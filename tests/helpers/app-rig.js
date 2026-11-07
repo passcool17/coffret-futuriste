@@ -10,5 +10,5 @@ export function appRig(raw=null,{deferScene=false}={}){
  const source=fs.readFileSync(new URL('../../src/app.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace(/await import\('\.\/scene\.js[^']*'\)/g,'await loadScene()');
  const env={...model,...content,createPersistence,audioEvent,audio:()=>sound,replaceControls:(node,html)=>{node.innerHTML=html;},document:doc,window,localStorage:storage,matchMedia:()=>({matches:false}),confirm:()=>confirmation,setInterval:fn=>{ticks.push(fn);},setTimeout:fn=>{timeouts.push(fn);},loadScene:()=>{const module={createScene:()=>{sceneBuilds++;return {focus(){},update(){},dispose(){},cancel(){},zoom(){}};}};return deferScene?new Promise(resolve=>sceneLoads.push(()=>resolve(module))):Promise.resolve(module);}};
  const api=new Function(...Object.keys(env),source+'\nreturn {act,newGame,getState:()=>state};')(...Object.values(env));
- return {...api,nodes,storage,get,sceneBuilds:()=>sceneBuilds,resolveScene:()=>sceneLoads.shift()?.(),tick:()=>ticks.forEach(fn=>fn()),confirm:value=>{confirmation=value;},flushTimeouts:()=>timeouts.splice(0).forEach(fn=>fn())};
+ return {...api,nodes,storage,get,active:()=>doc.activeElement,sceneBuilds:()=>sceneBuilds,resolveScene:()=>sceneLoads.shift()?.(),tick:()=>ticks.forEach(fn=>fn()),confirm:value=>{confirmation=value;},flushTimeouts:()=>timeouts.splice(0).forEach(fn=>fn())};
 }

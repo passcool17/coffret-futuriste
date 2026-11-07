@@ -18,8 +18,9 @@ function refreshRecovery(){
 function storageFailure(){refreshRecovery();}
 function save(){if(!running)return false;const ok=persistence.save(state);if(!ok)storageFailure();return ok;}
 function showSession(){
+ const recoverFocus=['retrySave','replaceSave','playMemory'].includes(document.activeElement?.id);
  running=true;view=Math.min(state.stage,2);won=state.stage===3;timeoutShown=false;last=performance.now();
- refreshRecovery();render();announce(resumeMessage(state));startScene();
+ refreshRecovery();render();announce(resumeMessage(state));if(recoverFocus)$('view-'+view).focus({preventScroll:true});startScene();
 }
 function loadSession(){
  const saved=persistence.load();
@@ -59,7 +60,7 @@ function newGame(){
  state=newGameState(running?state:null,$('challenge').checked);running=true;
  if(['blocked','unavailable','unloaded'].includes(persistence.status))persistence.allowReplacement();
  won=false;timeoutShown=false;for(const id of ['menu','win','timeout'])$(id).close();
- save();refreshRecovery();setView(0);if(scene)scene.update(state,true);else startScene();
+ save();refreshRecovery();setView(0);$('view-0').focus({preventScroll:true});if(scene)scene.update(state,true);else startScene();
  announce('Nouvelle partie · Dossier '+state.config.dossierId+'. Déduisez le routage de l’alimentation.');sound.pause();sound.resume(state.settings,state.stage);
 }
 $('retrySave').onclick=()=>{if(running&&!confirm('Relire la sauvegarde remplacera la progression non enregistrée en mémoire. Continuer ?'))return;loadSession();};
@@ -67,7 +68,7 @@ $('replaceSave').onclick=newGame;
 $('playMemory').onclick=()=>{
  persistence.playInMemory();
  if(!running){state=newGameState();state.settings.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;showSession();}
- else refreshRecovery();
+ else{refreshRecovery();$('view-'+Math.min(state.stage,2)).focus({preventScroll:true});}
  announce('Partie en mémoire uniquement. Gardez cette page ouverte; votre ancienne sauvegarde reste intacte.');
 };
 $('newGame').onclick=newGame;$('restartWin').onclick=newGame;$('restartTimeout').onclick=newGame;$('review').onclick=()=>$('win').close();$('continue').onclick=()=>{$('timeout').close();act({type:'untimed'});};
