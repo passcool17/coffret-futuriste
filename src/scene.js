@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
-import {SYMBOLS} from './model.js';
-import {names,glyphs} from './content.js?v=rings-26758d5';
-import {createRing,drawSymbol,RING_DEPTH,ringValueFromDrag} from './ring-graphics.js?v=rings-26758d5';
+import {SYMBOLS} from './model.js?v=replay-bank-v1';
+import {names,glyphs,puzzleContent} from './content.js?v=replay-bank-v1';
+import {createRing,drawSymbol,RING_DEPTH,ringValueFromDrag} from './ring-graphics.js?v=replay-bank-v1';
 
 export function createScene(canvas,dispatch,notify){
  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});
@@ -51,7 +51,7 @@ export function createScene(canvas,dispatch,notify){
  const handle=new THREE.Group();handle.position.set(3.35,-1.24,.54);lid.add(handle);for(const x of [-.57,.57])box(handle,x,0,0,.13,.37,.15,metal);const grip=pick(box(handle,0,.16,.12,1.27,.16,.2,amber),{kind:'open'});label(lid,'SOULEVER',3.35,-1.72,.5,1.7,.17);
  const sequenceLabels=[];for(let i=0;i<4;i++)sequenceLabels.push(label(lid,'·',2.23+i*.75,-.8,.6,.44,.25));
  // Engraved strips carry mnemonic relations; the full readable wording is in the adjacent carnet.
- label(lid,'☼ < ≋   /   ☼ ~ ≋',-3.35,1.25,.4,2.5,.16);label(lid,'☼ < △   /   ≋ ~ ♧',-3.35,-1.95,.4,2.5,.16);
+ const cluePlates=[label(lid,'',-3.35,1.25,.4,2.5,.16),label(lid,'',-3.35,-1.95,.4,2.5,.16)];cluePlates[0].name='power-clue-top';cluePlates[1].name='power-clue-bottom';let plateConfig='';
  const moduleTargets=[];for(let i=0;i<3;i++){const proxy=pick(box(lid,[-3.35,0,3.35][i],0,1.3,3.16,3.75,.01,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false})),{kind:'module',index:i});moduleTargets.push(proxy);}
  let state,selected=null,drag=null,view=-1,zoom=1,yaw=0,tilt=.6,raf=0,disposed=false,lost=false;
  const listeners=[];
@@ -65,7 +65,7 @@ export function createScene(canvas,dispatch,notify){
  function wireUpdate(i){wires[i].geometry.dispose();wires[i].geometry=cable(i,plugs[i].position);}
  function writeLabel(mesh,text){const c=mesh.material.map.image;const ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='#c8dfdf';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`600 ${Math.round(c.height*.65)}px system-ui`;const symbol=Object.keys(glyphs).find(k=>glyphs[k]===text);if(symbol)drawSymbol(ctx,symbol,c.width/2,c.height/2,Math.min(c.width,c.height)*.85,'#c8dfdf');else ctx.fillText(text,c.width/2,c.height/2,c.width*.94);mesh.material.map.needsUpdate=true;}
  function restorePositions(){if(!state)return;for(let i=0;i<4;i++){const slot=state.power.indexOf(SYMBOLS[i]);plugs[i].position.set(slot<0?homeX[i]:sourceX[slot],slot<0?homeY:socketY,.64);plugs[i].material.emissive.setHex(selected===i?0x4a7060:0);wireUpdate(i);}for(let i=0;i<3;i++)rings[i].rotation.z=state.rings[i]*Math.PI/3;for(let i=0;i<4;i++)tabs[i].position.y=state.sequence.includes(SYMBOLS[i])?-.1:.65;}
- function update(s,instant=false){state=s;if(s.stage!==previousStage){selected=null;previousStage=s.stage;}restorePositions();for(let i=0;i<3;i++)writeLabel(ringLabels[i],['Extérieur','Milieu','Intérieur'][i]+' : '+names[SYMBOLS[s.rings[i]]]);for(let i=0;i<4;i++)writeLabel(sequenceLabels[i],s.sequence[i]?glyphs[s.sequence[i]]:'·');powerSwitch.material=s.stage>0?accent:amber;if(instant){lidAngle=s.stage===3?-65*Math.PI/180:0;cover1=s.stage>0?1:0;cover2=s.stage>1?1:0;coreZ=s.stage===3?.7:-.05;}request();}
+ function update(s,instant=false){state=s;const configKey=JSON.stringify(s.config);if(plateConfig!==configKey){puzzleContent(s).plates.forEach((text,i)=>writeLabel(cluePlates[i],text));plateConfig=configKey;}if(s.stage!==previousStage){selected=null;previousStage=s.stage;}restorePositions();for(let i=0;i<3;i++)writeLabel(ringLabels[i],['Extérieur','Milieu','Intérieur'][i]+' : '+names[SYMBOLS[s.rings[i]]]);for(let i=0;i<4;i++)writeLabel(sequenceLabels[i],s.sequence[i]?glyphs[s.sequence[i]]:'·');powerSwitch.material=s.stage>0?accent:amber;if(instant){lidAngle=s.stage===3?-65*Math.PI/180:0;cover1=s.stage>0?1:0;cover2=s.stage>1?1:0;coreZ=s.stage===3?.7:-.05;}request();}
  function focus(v){view=v;yaw=0;tilt=.6;zoom=1;request();}
  function request(){if(!raf&&!disposed&&!lost&&!document.hidden)raf=requestAnimationFrame(render);}
  let slowSamples=[],quality=0;

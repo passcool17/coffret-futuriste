@@ -1,4 +1,4 @@
-import {IDS} from './puzzles.js';
+import {IDS} from './puzzles.js?v=replay-bank-v1';
 const uint32=x=>Number.isInteger(x)&&x>0&&x<=0xffffffff;
 function next(x){x^=x<<13;x^=x>>>17;x^=x<<5;return x>>>0;}
 export function makeSeed(){

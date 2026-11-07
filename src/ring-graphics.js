@@ -1,4 +1,4 @@
-import {SYMBOLS} from './model.js';
+import {SYMBOLS} from './model.js?v=replay-bank-v1';
 
 export const RING_STEP=Math.PI/3;
 export const RING_DEPTH=.12;

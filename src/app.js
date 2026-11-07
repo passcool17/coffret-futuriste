@@ -1,15 +1,36 @@
-import {fresh,transition,restore,tick,SYMBOLS} from './model.js';
-import {names,glyphs,titles,intros,clues,definitions,hints,resumeMessage} from './content.js?v=rings-26758d5';
+import {createPersistence} from './session-storage.js?v=replay-bank-v1';
+import {fresh,newGameState,transition,restore,tick,SYMBOLS} from './model.js?v=replay-bank-v1';
+import {names,glyphs,titles,intros,clues,definitions,hints,resumeMessage,puzzleContent} from './content.js?v=replay-bank-v1';
 import {audio} from './audio.js';
 import {audioEvent} from './audio-events.js';
 import {replaceControls} from './control-focus.js';
-const $=id=>document.getElementById(id),key='coffret-futuriste:v1',sound=audio({available:()=>!document.hidden&&document.hasFocus()&&!$('menu').open&&!$('timeout').open,onUnavailable:text=>announce(text)});
-let state=fresh(),view=0,scene,sceneGeneration=0,hasFocus=document.hasFocus(),last=performance.now(),timeoutShown=false,won=false;
-try{const raw=localStorage.getItem(key);if(raw){const saved=restore(raw);if(saved)state=saved;else{$('storageWarning').hidden=false;$('storageWarning').textContent='Sauvegarde incompatible ou endommagée. Une nouvelle partie a été préparée; aucun autre jeu n’a été touché.';}}else state.settings.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch{storageFailure();}
-function storageFailure(){$('storageWarning').hidden=false;$('storageWarning').textContent='Reprise indisponible sur cet appareil. Vous pouvez jouer, mais gardez cette page ouverte.';}
-function save(){try{localStorage.setItem(key,JSON.stringify(state));}catch{storageFailure();}}
+const $=id=>document.getElementById(id),key='coffret-futuriste:v1',sound=audio({available:()=>running&&!document.hidden&&document.hasFocus()&&!$('menu').open&&!$('timeout').open,onUnavailable:text=>announce(text)});
+const persistence=createPersistence({getItem:key=>localStorage.getItem(key),setItem:(key,value)=>localStorage.setItem(key,value)},raw=>restore(raw));
+let state=fresh(),running=false,view=0,scene,sceneGeneration=0,hasFocus=document.hasFocus(),last=performance.now(),timeoutShown=false,won=false;
+function refreshRecovery(){
+ const status=persistence.status;
+ $('gameRoot').inert=!running;$('menuButton').disabled=!running;
+ $('storageRecovery').hidden=['ready','empty','memory'].includes(status);
+ $('storageWarning').hidden=status==='ready'||status==='empty';
+ const text=status==='blocked'?'La sauvegarde ne peut pas être reprise. Elle n’a pas été remplacée.':status==='memory'?'Partie en mémoire uniquement. La sauvegarde précédente n’est pas remplacée.':'Reprise ou écriture indisponible sur cet appareil. La sauvegarde précédente n’a pas été effacée.';
+ $('storageWarning').textContent=text;$('recoveryMessage').textContent=text;
+}
+function storageFailure(){refreshRecovery();}
+function save(){if(!running)return false;const ok=persistence.save(state);if(!ok)storageFailure();return ok;}
+function showSession(){
+ running=true;view=Math.min(state.stage,2);won=state.stage===3;timeoutShown=false;last=performance.now();
+ refreshRecovery();render();announce(resumeMessage(state));startScene();
+}
+function loadSession(){
+ const saved=persistence.load();
+ if(saved){state=saved;showSession();return;}
+ if(persistence.status==='empty'){
+  state=newGameState();state.settings.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;running=true;save();showSession();return;
+ }
+ running=false;sound.pause();scene?.cancel();refreshRecovery();$('retrySave').focus();
+}
 function announce(text,fallback=false){if(text)$('message').textContent=text;if(fallback){$('fallback').hidden=false;$('alternatives').open=true;}}
-function act(action){if(action.type==='focus'){sound.resume(state.settings,state.stage);setView(action.index);return;}const focusOnAdvance=$('controls').contains(document.activeElement)||document.activeElement?.id==='apply';const before=state,oldStage=state.stage,result=transition(state,action);state=result.state;announce(result.message);if(action.type==='settings')sound.sync(state.settings);else sound.handleAction(audioEvent(action,before,result),state.settings);if(result.ok)save();render();if(action.type==='connect'&&!result.ok){const feedback=$('feedback-'+action.symbol);if(feedback)feedback.textContent=result.message;}scene?.update(state);if(state.stage>oldStage){view=Math.min(state.stage,2);setView(view,focusOnAdvance);if(state.stage===3&&!won){won=true;setTimeout(()=>{if(state.stage!==3)return;$('winSummary').textContent=`Résolu en ${format(state.elapsed)}. ${state.assisted.some(Boolean)?'Certaines étapes ont été appliquées avec aide.':'Aucune étape appliquée automatiquement.'}`;if(!$('win').open)$('win').showModal();},state.settings.reduced?150:1600);}}}
+function act(action){if(!running)return;if(action.type==='focus'){sound.resume(state.settings,state.stage);setView(action.index);return;}const focusOnAdvance=$('controls').contains(document.activeElement)||document.activeElement?.id==='apply';const before=state,oldStage=state.stage,result=transition(state,action);state=result.state;announce(result.message);if(action.type==='settings')sound.sync(state.settings);else sound.handleAction(audioEvent(action,before,result),state.settings);if(result.ok)save();render();if(action.type==='connect'&&!result.ok){const feedback=$('feedback-'+action.symbol);if(feedback)feedback.textContent=result.message;}scene?.update(state);if(state.stage>oldStage){view=Math.min(state.stage,2);setView(view,focusOnAdvance);if(state.stage===3&&!won){won=true;setTimeout(()=>{if(state.stage!==3)return;$('winSummary').textContent=`Résolu en ${format(state.elapsed)}. ${state.assisted.some(Boolean)?'Certaines étapes ont été appliquées avec aide.':'Aucune étape appliquée automatiquement.'}`;if(!$('win').open)$('win').showModal();},state.settings.reduced?150:1600);}}}
 function format(t){const seconds=Math.max(0,Math.floor(t));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');}
 function setView(v,focusControls=false){view=v<0?Math.min(state.stage,2):v;scene?.focus(v);document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.view===v)));$('viewLabel').textContent=v<0?'Un objet. Trois mécanismes.':titles[v];render();if(focusControls){$('alternatives').open=true;const first=$('controls').querySelector('button:not(:disabled),select:not(:disabled)');(first||$('view-all')).focus({preventScroll:true});}}
 const option=(value,text,selected)=>`<option value="${value}" ${selected?'selected':''}>${text}</option>`;
@@ -20,10 +41,11 @@ function controls(){const power=state.power;let h='';
  replaceControls($('controls'),h,document,$('view-all'));
 }
 function render(){
+ const dossier=puzzleContent(state);$('dossierLabel').textContent=dossier.id==='legacy-v1'?'Partie d’origine conservée':'Dossier '+dossier.id;
  const v=Math.min(view,2);$('progress').textContent=state.stage+' / 3';$('clock').hidden=!state.settings.clock;$('clock').textContent=(state.challenge?'Défi ':'')+format(state.challenge?1500-state.elapsed:state.elapsed);
- $('moduleTitle').textContent=state.stage===3?'Noyau stabilisé · '+titles[v]:titles[v];$('moduleIntro').textContent=view>state.stage?'Ce mécanisme attend l’étape précédente. Vous pouvez déjà examiner ses règles.':intros[v];$('clues').replaceChildren(...clues[v].map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));$('definitions').textContent=definitions[v];
+ $('moduleTitle').textContent=state.stage===3?'Noyau stabilisé · '+titles[v]:titles[v];$('moduleIntro').textContent=view>state.stage?'Ce mécanisme attend l’étape précédente. Vous pouvez déjà examiner ses règles.':intros[v];$('clues').replaceChildren(...dossier.clues[v].map(t=>{const li=document.createElement('li');li.textContent=t;return li;}));$('definitions').textContent=dossier.definitions[v];
  const ref=[];if(state.stage>=1)ref.push('Prises acquises : '+state.power.map((s,i)=>(i+1)+' '+names[s]).join(' · '));if(state.stage>=2)ref.push('Anneaux acquis : '+state.rings.map((s,i)=>['Extérieur','Milieu','Intérieur'][i]+' '+names[SYMBOLS[s]]).join(' · '));if(v===1)ref.push('Repères actuels : '+state.rings.map((s,i)=>['Ext.','Mil.','Int.'][i]+' '+names[SYMBOLS[s]]).join(' · '));if(v===2)ref.push('Séquence actuelle : '+(state.sequence.map(s=>names[s]).join(' → ')||'vide'));$('reference').textContent=ref.join('\n');
- const level=state.hints[v];$('hintCount').textContent=level+' / 3';$('hintButton').disabled=v!==state.stage||state.stage===3||level>=3;$('hintText').hidden=level===0;$('hintText').textContent=level?hints[v][level-1]:'';$('apply').hidden=level<3||v!==state.stage||state.stage===3;
+ const level=state.hints[v];$('hintCount').textContent=level+' / 3';$('hintButton').disabled=v!==state.stage||state.stage===3||level>=3;$('hintText').hidden=level===0;$('hintText').textContent=level?dossier.hints[v][level-1]:'';$('apply').hidden=level<3||v!==state.stage||state.stage===3;
  $('sound').textContent=state.settings.muted?'Son coupé':'Son activé';$('reduced').checked=state.settings.reduced;$('showClock').checked=state.settings.clock;$('volume').value=state.settings.volume;$('musicVolume').value=state.settings.musicVolume;$('effectsVolume').value=state.settings.effectsVolume;controls();
 }
 $('controls').addEventListener('change',e=>{const symbol=e.target.dataset.cable;if(symbol){const slot=+e.target.value;act(slot<0?{type:'unplug',symbol}:{type:'connect',symbol,slot});}});
@@ -32,12 +54,27 @@ $('controls').addEventListener('keydown',e=>{const b=e.target.closest('[data-rin
 for(const b of document.querySelectorAll('[data-view]'))b.addEventListener('click',()=>{setView(+b.dataset.view);sound.resume(state.settings,state.stage);});
 $('hintButton').onclick=()=>act({type:'hint'});$('apply').onclick=()=>{if(confirm('Appliquer cette étape ? Le bilan indiquera cette aide.'))act({type:'apply'});};$('sound').onclick=()=>{act({type:'settings',muted:!state.settings.muted});if(!state.settings.muted)sound.resume(state.settings,state.stage);};
 $('menuButton').onclick=()=>{$('menu').showModal();sound.pause();scene?.cancel();};$('resume').onclick=()=>{$('menu').close();sound.resume(state.settings,state.stage);};$('reduced').onchange=e=>act({type:'settings',reduced:e.target.checked});$('showClock').onchange=e=>act({type:'settings',clock:e.target.checked});$('volume').oninput=e=>act({type:'settings',volume:+e.target.value});$('musicVolume').oninput=e=>act({type:'settings',musicVolume:+e.target.value});$('effectsVolume').oninput=e=>act({type:'settings',effectsVolume:+e.target.value});
-function newGame(){if(!confirm('Effacer la progression de ce coffret et commencer une nouvelle partie ?'))return;const settings=state.settings;state=fresh($('challenge').checked);state.settings=settings;won=false;timeoutShown=false;for(const id of ['menu','win','timeout'])$(id).close();save();setView(0);scene?.update(state,true);announce('Nouvelle partie. Déduisez le routage de l’alimentation.');sound.pause();sound.resume(state.settings,state.stage);}
+function newGame(){
+ if(!confirm('Remplacer la progression enregistrée de ce coffret et commencer une nouvelle partie ?'))return;
+ state=newGameState(running?state:null,$('challenge').checked);running=true;
+ if(['blocked','unavailable','unloaded'].includes(persistence.status))persistence.allowReplacement();
+ won=false;timeoutShown=false;for(const id of ['menu','win','timeout'])$(id).close();
+ save();refreshRecovery();setView(0);if(scene)scene.update(state,true);else startScene();
+ announce('Nouvelle partie · Dossier '+state.config.dossierId+'. Déduisez le routage de l’alimentation.');sound.pause();sound.resume(state.settings,state.stage);
+}
+$('retrySave').onclick=()=>{if(running&&!confirm('Relire la sauvegarde remplacera la progression non enregistrée en mémoire. Continuer ?'))return;loadSession();};
+$('replaceSave').onclick=newGame;
+$('playMemory').onclick=()=>{
+ persistence.playInMemory();
+ if(!running){state=newGameState();state.settings.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;showSession();}
+ else refreshRecovery();
+ announce('Partie en mémoire uniquement. Gardez cette page ouverte; votre ancienne sauvegarde reste intacte.');
+};
 $('newGame').onclick=newGame;$('restartWin').onclick=newGame;$('restartTimeout').onclick=newGame;$('review').onclick=()=>$('win').close();$('continue').onclick=()=>{$('timeout').close();act({type:'untimed'});};
 $('zoomIn').onclick=()=>{scene?.zoom(-.12);sound.resume(state.settings,state.stage);};$('zoomOut').onclick=()=>{scene?.zoom(.12);sound.resume(state.settings,state.stage);};
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelector('dialog[open]')){setView(-1);document.querySelector('[data-view="-1"]').focus();}});
+window.addEventListener('keydown',e=>{if(running&&e.key==='Escape'&&!document.querySelector('dialog[open]')){setView(-1);document.querySelector('[data-view="-1"]').focus();}});
 window.addEventListener('focus',()=>{hasFocus=true;last=performance.now();});window.addEventListener('blur',()=>{hasFocus=false;sound.pause();scene?.cancel();save();});document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){sound.pause();scene?.cancel();save();}});
 window.addEventListener('pagehide',e=>{if(e.persisted)sound.pause();else sound.dispose();});
-setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;const active=!document.hidden&&hasFocus&&!document.querySelector('dialog[open]');state=tick(state,dt,active);$('clock').textContent=(state.challenge?'Défi ':'')+format(state.challenge?1500-state.elapsed:state.elapsed);if(active)save();if(state.challenge&&state.elapsed>=1500&&!timeoutShown&&active){timeoutShown=true;$('timeout').showModal();sound.pause();}},1000);
-async function startScene(){const generation=++sceneGeneration;try{scene?.dispose();scene=null;const {createScene}=await import('./scene.js?v=rings-26758d5');if(generation!==sceneGeneration)return;scene=createScene($('scene'),act,announce);scene.update(state,true);scene.focus(-1);$('fallback').hidden=true;}catch(error){if(generation!==sceneGeneration)return;console.warn('Vue 3D indisponible',error);announce('Vue 3D indisponible. Les commandes accessibles permettent de jouer.',true);}}
-$('retry').onclick=startScene;view=Math.min(state.stage,2);won=state.stage===3;render();announce(resumeMessage(state));startScene();
+setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;const active=running&&!document.hidden&&hasFocus&&!document.querySelector('dialog[open]');state=tick(state,dt,active);$('clock').textContent=(state.challenge?'Défi ':'')+format(state.challenge?1500-state.elapsed:state.elapsed);if(active)save();if(state.challenge&&state.elapsed>=1500&&!timeoutShown&&active){timeoutShown=true;$('timeout').showModal();sound.pause();}},1000);
+async function startScene(){if(!running)return;const generation=++sceneGeneration;try{scene?.dispose();scene=null;const {createScene}=await import('./scene.js?v=replay-bank-v1');if(generation!==sceneGeneration||!running)return;scene=createScene($('scene'),act,announce);scene.update(state,true);scene.focus(-1);$('fallback').hidden=true;}catch(error){if(generation!==sceneGeneration||!running)return;console.warn('Vue 3D indisponible',error);announce('Vue 3D indisponible. Les commandes accessibles permettent de jouer.',true);}}
+$('retry').onclick=startScene;loadSession();

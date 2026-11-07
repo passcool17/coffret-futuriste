@@ -1,5 +1,5 @@
-import {SYMBOLS,ACTIVE,LEGACY,getPuzzle,constraintsFor,matches,solutionsFor} from './puzzles.js';
-import {selectNext,validSelection} from './selector.js';
+import {SYMBOLS,ACTIVE,LEGACY,getPuzzle,constraintsFor,matches,solutionsFor} from './puzzles.js?v=replay-bank-v1';
+import {selectNext,validSelection} from './selector.js?v=replay-bank-v1';
 export {SYMBOLS};
 const permutation=a=>Array.isArray(a)&&a.length===4&&new Set(a).size===4&&a.every(x=>ACTIVE.includes(x));
 export function powerValid(p,config=LEGACY){return !!getPuzzle(config)&&permutation(p)&&matches(p,constraintsFor(config,0),{stage:0});}
