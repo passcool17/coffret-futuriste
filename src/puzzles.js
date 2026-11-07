@@ -31,6 +31,7 @@ export const IDS=Object.freeze(rows.map(row=>row[0]));
 const legacy=build('A0','SVLM','OTI',3,[1,4]);
 legacy.id='legacy-v1';legacy.family='legacy';
 legacy.constraints[0]=[['before','S','V'],['adj','S','V'],['before','S','M'],['adj','V','L']];
+legacy.constraints[2]=[['before','O','T'],['before','T','I'],['notend','L'],['notadj','L','I']];
 freeze(legacy);
 export function getPuzzle(config=LEGACY){
  if(config?.bankVersion===0&&config.dossierId==='legacy-v1')return legacy;

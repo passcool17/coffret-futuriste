@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 let m; try { m=await import('../src/model.js'); } catch {}
 const perms=a=>a.length?a.flatMap((x,i)=>perms(a.filter((_,j)=>j!==i)).map(p=>[x,...p])):[[]];
 test('model exists',()=>assert.ok(m,'Pure model must exist'));
-test('24 routings have one valid solution',()=>{assert.ok(m);assert.deepEqual(perms(['S','V','L','M']).filter(m.powerValid),[['S','V','L','M']]);});
+test('24 routings have one valid solution',()=>{assert.ok(m);assert.deepEqual(perms(['S','V','L','M']).filter(p=>m.powerValid(p)),[['S','V','L','M']]);});
 test('216 ring triples have one valid solution',()=>{assert.ok(m);const all=[];for(let a=0;a<6;a++)for(let b=0;b<6;b++)for(let c=0;c<6;c++)all.push([a,b,c]);assert.deepEqual(all.filter(r=>m.ringsValid(r,['S','V','L','M'])),[[1,0,3]]);});
 test('24 release sequences have one valid solution',()=>{assert.ok(m);assert.deepEqual(perms(['S','V','L','M']).filter(p=>m.releaseValid(p,[1,0,3])),[['V','L','S','M']]);});
 const go=(s,a)=>m.transition(s,a).state;
