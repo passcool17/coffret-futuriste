@@ -37,6 +37,7 @@ export function restore(raw){try{
  if(!Number.isFinite(s.elapsed)||s.elapsed<0||typeof s.challenge!=='boolean'||!s.settings||!['muted','reduced','clock'].every(k=>typeof s.settings[k]==='boolean')||!Number.isFinite(s.settings.volume)||s.settings.volume<0||s.settings.volume>1)return null;
  if(!Array.isArray(s.hints)||s.hints.length!==3||s.hints.some(x=>!Number.isInteger(x)||x<0||x>3)||!Array.isArray(s.assisted)||s.assisted.length!==3||s.assisted.some(x=>typeof x!=='boolean'))return null;
  if(s.stage>0&&!powerValid(s.power)||s.stage>1&&!ringsValid(s.rings,s.power)||s.stage>2&&!releaseValid(s.sequence,s.rings)||s.stage<2&&s.sequence.length)return null;
+ if(s.stage===0&&s.rings.some(x=>x!==5)||s.hints.some((x,i)=>i>s.stage&&x!==0)||s.assisted.some((x,i)=>x&&(i>=s.stage||s.hints[i]!==3)))return null;
  // Copy the known schema only; untrusted saves cannot add settings or properties.
  const n=fresh(s.challenge);for(const k of ['power','rings','sequence','stage','hints','assisted','elapsed'])n[k]=s[k];for(const k of Object.keys(n.settings))n.settings[k]=s.settings[k];return n;
  }catch{return null;}}

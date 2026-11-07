@@ -1,6 +1,6 @@
 # Le Coffret — Noyau boréal
 
-Date : 7 novembre 2026. Statut : proposition complète à approuver, **pas une implémentation**.
+Date : 7 novembre 2026. Statut : design approuvé le 7 novembre 2026 à 11 h 09 (Toronto), construction locale autorisée.
 
 ## Mandat et limites
 
@@ -134,3 +134,6 @@ Qualité initiale mobile : ratio pixels plafonné à 1,5, pas d’ombre dynamiqu
 Relecture effectuée : trois modules, solutions déterministes et préconditions explicites et quatre contraintes indépendantes chacune, énumérées exhaustivement; les commandes alternatives ne contournent pas les règles; aucun échec irréversible; état final distinct des animations; chiffres de performance explicitement des cibles. Pas d’espace multijoueur, inventaire, seconde salle, narration extensive ou outil de désamorçage. Aucun placeholder de conception restant. Les anciens fléchages de solution, positions directement dictées et ordre I puis II ont été retirés. Aucun signal de justesse partielle ne permet de résoudre par collecte de confirmations. Les règles et aides ne reposent pas sur les couleurs.
 
 Ce document est local, non commité et non publié, conformément à la portée limitée aux documents. Le choix et les règles demandent maintenant l’approbation de Pascal. Après approbation seulement : plan d’implémentation distinct, puis construction locale. Aucune autorisation de publication déduite de cette spécification.
+
+## Suivi de construction locale
+Autorisation reçue : « Oui, je valide les trois énigmes de déduction reliées et le design du coffret. Construis-le maintenant. » Plan créé dans ../plans/2026-11-07-coffret-implementation.md. Le mandat ci-dessus décrit la phase de conception initiale; README.md et GAME.md décrivent désormais l’implémentation et ses limites vérifiées/non vérifiées. Aucune publication autorisée ici.
