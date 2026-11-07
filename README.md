@@ -48,10 +48,16 @@ Le refus d’une prise occupée apparaît maintenant directement sous le menu de
 
 Après QA responsive bureau à 360 × 800 : la légende et le zoom sont déplacés dans une barre réservée hors canvas, sans masquer de texte. Un branchement direct a été observé, ainsi que la persistance du mute/volume après recharge; cela ne valide ni un écran tactile physique ni un son audible. Le coordinateur a confirmé que le 404 concernait favicon.ico. Retest responsive du placement rapporté réussi par le coordinateur. Suite de base avant audio : 36 tests Node.
 
-## Passe audio approuvée — locale, en attente de revue
+## Passe audio approuvée — publiée en 9027626
 
 Musique originale procédurale douce (sans percussion), effets distincts pour fiches/anneaux/languettes/capots et courte cadence finale. Le menu propose Volume général, Musique et Effets; Son reste le mute global. Ces préférences persistent sans invalider les anciennes sauvegardes v1. La musique démarre sur une commande explicite, pas au chargement; menu, onglet caché et perte de focus la mettent en pause, puis Reprendre ou le prochain geste la réactive. Le rendu audio n’utilise pas la boucle 3D.
 
 Limites : trois voix musicales, huit voix d’effets, tampon bruit mono d’une seconde, aucune ressource audio externe. Les effets excédentaires sont abandonnés plutôt que mis en attente; les ouvertures ont priorité sur l’anti-rebond ordinaire. La musique dépend seulement des étapes acquises, pas de la justesse partielle.
 
-Cette passe n’est PAS encore poussée : le site public conserve 8bf3225 pendant la revue indépendante. Aucun essai auditif du nouveau mix effectué par le constructeur. Les tests utilisent des contextes/horloges factices; aucun renderer offline n’était installé et aucune dépendance n’a été ajoutée pour produire un échantillon. Écoute réelle bureau/S20 et mesure de consommation restent à faire.
+Cette passe a été publiée en 9027626 après revue indépendante. Pascal a indiqué que la musique convenait à 12 h 02 (Toronto), selon le coordinateur. Aucun essai auditif du nouveau mix effectué par le constructeur. Les tests utilisent des contextes/horloges factices; aucun renderer offline n’était installé et aucune dépendance n’a été ajoutée pour produire un échantillon. Écoute réelle bureau/S20 et mesure de consommation restent à faire.
+
+## Correction ciblée des anneaux — locale, publication retenue
+
+La solution logique demeure inchangée. Les anciens pictogrammes étaient des plans rectangulaires au-dessus d’un tore, avec une rotation locale de signe erroné : quatre symboles sur six arrivaient inclinés au repère. Les anneaux ont maintenant une face annulaire solide dont la texture de matériau porte directement les symboles vectoriels, sans plaque flottante. Chaque bande possède son repère fixe; le symbole sélectionné est redressé. La même famille de tracés sert aux fiches et languettes physiques.
+
+66 tests Node passent, y compris 18 correspondances physiques, les 216 combinaisons logiques et les deux sens/passage du zéro. Ces contrôles CPU et Canvas2D simulés ne prouvent pas encore le résultat visuel : revue puis QA réelle bureau et 360 × 800 requises avant publication. Sauvegardes, solutions et musique conservées. Voir GAME.md pour le protocole de validation.

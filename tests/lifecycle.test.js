@@ -1,11 +1,12 @@
+import * as ringGraphics from '../src/ring-graphics.js';
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import * as THREE from '../vendor/three.module.js';import {fresh,SYMBOLS} from '../src/model.js';import {names,glyphs} from '../src/content.js';
 function harness(){
  class Target extends EventTarget{listeners=new Map();addEventListener(type,fn,options){super.addEventListener(type,fn,options);this.listeners.set(fn,type);}removeEventListener(type,fn,options){super.removeEventListener(type,fn,options);this.listeners.delete(fn);}getBoundingClientRect(){return {left:0,top:0,width:800,height:600};}setPointerCapture(){}releasePointerCapture(){}}
- const canvas=new Target(),window=new Target(),document=new Target();document.hidden=false;document.createElement=()=>({getContext:()=>({fillRect(){},clearRect(){},fillText(){}})});
+ const canvas=new Target(),window=new Target(),document=new Target();document.hidden=false;document.createElement=()=>({getContext:()=>({fillRect(){},clearRect(){},fillText(){},beginPath(){},moveTo(){},lineTo(){},arc(){},stroke(){},closePath(){},save(){},restore(){},translate(){},scale(){},rotate(){},bezierCurveTo(){}})});
  let disposals=0;class Renderer{setClearColor(){}setPixelRatio(){}setSize(){}dispose(){disposals++;}info={};}
  class Raycaster{setFromCamera(){}intersectObjects(targets){return [{object:targets.find(o=>o.userData.action.kind==='ring')}];}}
  const source=fs.readFileSync(new URL('../src/scene.js',import.meta.url),'utf8').replace(/^import .*;\n/gm,'').replace('export function createScene','function createScene');
- const create=new Function('THREE','SYMBOLS','names','glyphs','window','document','ResizeObserver','requestAnimationFrame','cancelAnimationFrame','devicePixelRatio',source+'\nreturn createScene;')({...THREE,WebGLRenderer:Renderer,Raycaster},SYMBOLS,names,glyphs,window,document,class {observe(){}disconnect(){}},()=>1,()=>{},1);
+ const create=new Function('THREE','SYMBOLS','names','glyphs','window','document','ResizeObserver','requestAnimationFrame','cancelAnimationFrame','devicePixelRatio',...Object.keys(ringGraphics),source+'\nreturn createScene;')({...THREE,WebGLRenderer:Renderer,Raycaster},SYMBOLS,names,glyphs,window,document,class {observe(){}disconnect(){}},()=>1,()=>{},1,...Object.values(ringGraphics));
  const click=()=>{for(const type of ['pointerdown','pointerup']){const e=new Event(type);Object.assign(e,{button:0,pointerId:1,clientX:100,clientY:100});canvas.dispatchEvent(e);}};
  const setup=(actions,notices)=>{const scene=create(canvas,a=>actions.push(a),a=>notices.push(a));scene.update({...fresh(),stage:1,power:['S','V','L','M']},true);scene.focus(1);return scene;};
  return {canvas,window,document,setup,click,disposals:()=>disposals};

@@ -4,7 +4,7 @@
 
 Prototype vertical jouable à trois énigmes, construit localement après approbation du design. Ce n’est pas une certification de qualité visuelle ou de performance S20. Aucun autre jeu modifié. Publication du prototype autorisée ensuite, le 7 novembre 2026 à 11 h 19 (Toronto), sur le nouveau dépôt public passcool17/coffret-futuriste et GitHub Pages.
 
-Fichiers : `src/model.js` règles et sauvegarde; `src/app.js` interface/session; `src/content.js` indices; `src/scene.js` scène et gestes; `src/audio.js` clics synthétiques; `style.css` présentation; `vendor/` Three.js et licence. Aucun build requis.
+Fichiers : `src/model.js` règles et sauvegarde; `src/app.js` interface/session; `src/content.js` indices; `src/scene.js` scène et gestes; `src/ring-graphics.js` face des anneaux et pictogrammes vectoriels; `src/audio.js` clics synthétiques; `style.css` présentation; `vendor/` Three.js et licence. Aucun build requis.
 
 ## Contrôles QA à faire en navigateur
 
@@ -70,7 +70,7 @@ Capture de QA fournie : les légendes et boutons de zoom recouvraient les étiqu
 
 36 tests Node passent, dont la régression de séparation des outils et de la zone interactive. Son audible, gestes tactiles réels, fluidité mobile et S20 toujours non validés.
 
-## Passe audio — état courant avant revue indépendante
+## Passe audio — historique de construction avant revue indépendante
 
 Design et construction autorisés par Pascal via sa réponse à la carte t126s858. Implémentation locale uniquement, push retenu pour revue. Version publique inchangée : 8bf3225. Aucun autre jeu ou compte modifié. Les notes de QA plus anciennes ci-dessus décrivent les versions et observations à leur date. Mise à jour : correctif de recouvrement retesté avec succès à 360 × 800 et favicon 200, selon le coordinateur; Pascal a confirmé le clic entendu et le toucher direct sur S20 à 11 h 36 (Toronto). Cela ne valide pas cette nouvelle musique ni un profilage S20.
 
@@ -91,4 +91,24 @@ Les limites conservatrices abandonnent les requêtes excédentaires plutôt que 
 
 Aucun navigateur ni service externe utilisé pour la construction audio. Pas de renderer Web Audio offline préinstallé; l’échantillon optionnel est donc omis sans ajouter de bibliothèque. Les métriques de voix/temps obtenues dans les tests ne prouvent pas une qualité audible.
 
-Bilan de construction audio : 60 tests passent (36 de base et 24 ajouts). Une dernière régression vérifie qu’un démarrage musical partiellement échoué amortit aussi les voix déjà démarrées. Syntaxe et diff-check propres. Revue indépendante toujours requise avant push; nouveau mix toujours non écouté.
+Bilan de construction audio : 60 tests passent (36 de base et 24 ajouts). Une dernière régression vérifie qu’un démarrage musical partiellement échoué amortit aussi les voix déjà démarrées. Syntaxe et diff-check propres. À ce stade historique, revue indépendante requise avant push et nouveau mix non écouté. Depuis : revue effectuée et version 9027626 publiée; Pascal a indiqué à 12 h 02 (Toronto) que la musique convenait, selon le coordinateur. Pas de mesure matérielle ni d’écoute par le constructeur.
+
+## Correction ciblée des anneaux — 7 novembre 2026 (Toronto), locale non publiée
+
+Demande t131u et précision t132u : énigme centrale difficile à interpréter, symboles ressemblant à des autocollants non collés. La QA publique reçue prouve un seul pas Étoile→Soleil extérieur concordant avec le texte; elle ne prouve pas les 18 correspondances. Les captures montrent les plaques sombres détachées. Les précédentes résolutions par comptage de clics ne validaient pas la lecture des glyphes 3D.
+
+**Diagnostic démontré avant correction (tests rouges)** : le placement des centres au repère était juste; l’orientation locale `+index·π/3` s’ajoutait à la rotation du groupe au lieu de la compenser. Vague/Feuille/Lune/Étoile arrivaient à 120° ou 240°, contre 0° attendu. Les rectangles étaient à z=0,64 alors que le point le plus haut du tore était à z=0,61; leur largeur radiale de 0,27 dépassait aussi la bande de 0,26. Ce défaut géométrique est distinct de la logique : les 216 configurations donnent toujours la seule solution décrite plus haut.
+
+**Correction** : bande annulaire extrudée, face plane métallique avec tracés intégrés à sa propre texture de matériau; plus aucun mesh rectangulaire de symbole sur les anneaux. Tracés originaux sans police, centrés dans la largeur utile, contre-rotation correcte et trois petits repères fixes dans les interstices. Même famille vectorielle sur fiches/languettes. Le centre du geste circulaire est projeté depuis le centre réel de la face, pas une position mondiale approximative. Aucune solution, règle, difficulté, progression, sauvegarde ou musique changée. Pas de mise en évidence de la bonne réponse.
+
+**Preuves locales** : deux reproductions rouges puis vertes (orientation et support physique), 65/66 tests, syntaxe et diff-check. Tests CPU de tous les symboles sur les trois anneaux, UV de face normalisés, absence des plaques, trois repères, motifs vectoriels distincts, deux sens et tours complets/passage du zéro, solution unique inchangée. Le renderer et Canvas2D restent simulés : aucune affirmation de validation visuelle ou de fluidité physique.
+
+**Revue et QA navigateur à effectuer avant push** :
+- [ ] Gros plan bureau et 360 × 800 : face/support continus, aucun rectangle, trou ni scintillement; symboles lisibles et non étirés. Les petits triangles sont dans les interstices, sans masquer les symboles.
+- [ ] Pour chaque anneau, parcourir six clics : Étoile→Soleil→Vague→Feuille→Montagne→Lune→Étoile. À chaque cran, pictogramme au triangle et nom du carnet correspondent; pictogramme du haut droit, soleil distinct d’étoile, feuille identifiable. Photographier au moins Vague et Feuille (anciens angles erronés).
+- [ ] Glisser dans les deux sens, traverser le zéro et annuler un geste; un seul cran/action confirmé, fond seul pour orbiter. Vérifier sur appareil si possible, sans prétendre à un profilage S20.
+- [ ] Refuser une combinaison erronée, accepter extérieur Vague / milieu Soleil / intérieur Montagne, puis poursuivre la troisième énigme. Vérifier aussi clavier et boutons accessibles.
+- [ ] Recharger une sauvegarde existante à 2/3 puis une sauvegarde avec anneaux partiellement réglés : état et symbole conservés. Relancer deux fois la 3D et répéter un clic (pas de double événement).
+- [ ] Vérifier musique/volumes/mute inchangés, uniquement comme non-régression. Aucun nouvel essai auditif du constructeur.
+
+Push volontairement retenu pour revue indépendante et coordination de la QA réelle. Le brouillon de conception générale non approuvé reste hors de ce correctif.
