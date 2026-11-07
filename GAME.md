@@ -35,7 +35,7 @@ Les raisonnements humains et les contraintes indépendantes sont détaillés dan
 
 ## Limites à traiter selon la QA
 
-Pas de navigateur lancé par le constructeur : gestes, cadrage, son et performances restent à observer. Les sources ne constituent pas une preuve visuelle. La scène utilise un plafonnement de ratio pixels et une réduction de qualité; son seuil doit être vérifié au profiler. Le nombre d’objets/étiquettes peut nécessiter une optimisation des appels de dessin. Le noyau n’a pas de pulsation continue, afin de garder le rendu à la demande au repos. Pas de génération aléatoire ni d’autre coffret.
+Pas de navigateur lancé par le constructeur. Le coordinateur a ensuite rapporté une résolution des trois étapes sur le site public et la reprise à 2/3; audio, tactile/mobile, cadrage détaillé et performances restent à vérifier. Les sources ne constituent pas une preuve visuelle. La scène utilise un plafonnement de ratio pixels et une réduction de qualité; son seuil doit être vérifié au profiler. Le nombre d’objets/étiquettes peut nécessiter une optimisation des appels de dessin. Le noyau n’a pas de pulsation continue, afin de garder le rendu à la demande au repos. Pas de génération aléatoire ni d’autre coffret.
 
 ## Corrections de revue — 7 novembre 2026, 11 h 17 et suivantes (Toronto)
 
@@ -45,10 +45,20 @@ Deux défauts reproduits avant correction dans des tests Node, sans lancer de na
 
 31 tests passent, dont les nouvelles reproductions cycle de vie et focus. Le harness de cycle de vie utilise la géométrie Three.js réelle, un renderer factice et des EventTarget Node; celui du focus utilise un DOM minimal simulé. Ils ne prouvent pas le fonctionnement visuel dans Chrome ni un lecteur d’écran réel.
 
-QA navigateur toujours bloquée : le coordinateur signale localhost inaccessible depuis le navigateur malgré HTTP 200 via curl. Aucun contournement par automatisation navigateur tenté. Rendu, son et S20 restent non validés. Ajouter à la QA réelle : relancer la vue deux fois puis cliquer un anneau (un seul cran), et résoudre la séquence au clavier sans perdre le focus.
+État historique avant QA publique — QA locale bloquée : le coordinateur signale localhost inaccessible depuis le navigateur malgré HTTP 200 via curl. Aucun contournement par automatisation navigateur tenté. Rendu, son et S20 restent non validés. Ajouter à la QA réelle : relancer la vue deux fois puis cliquer un anneau (un seul cran), et résoudre la séquence au clavier sans perdre le focus.
 
 ## Publication du prototype
 
 Jeu : https://passcool17.github.io/coffret-futuriste/
 Sources : https://github.com/passcool17/coffret-futuriste
-Déploiement statique GitHub Pages depuis `main:/`, sans dépendance CDN runtime. `.nojekyll` conserve les fichiers tels quels. La vérification de livraison compare les SHA-256 locaux et les réponses publiques pour l’entrée, le CSS et tous les modules, y compris les deux fichiers Three.js. Cette vérification réseau ne valide ni le rendu ni l’audio. Aucun navigateur ou S20 testé; checklist ci-dessus toujours ouverte.
+Déploiement statique GitHub Pages depuis `main:/`, sans dépendance CDN runtime. `.nojekyll` conserve les fichiers tels quels. La vérification de livraison compare les SHA-256 locaux et les réponses publiques pour l’entrée, le CSS et tous les modules, y compris les deux fichiers Three.js. Cette vérification réseau ne valide ni le rendu ni l’audio. QA publique bureau rapportée ensuite par le coordinateur; S20, audio et tactile restent non testés. La checklist exhaustive reste ouverte.
+
+## QA publique et correctifs — 7 novembre 2026, après 11 h 28 (Toronto)
+
+Observations rapportées par le coordinateur : trois mécanismes résolus dans le navigateur bureau public, mauvaises solutions rejetées, reprise de progression à 2/3 fonctionnelle. Ceci ne valide pas le son, les interactions tactiles/mobile ou le S20; aucun nouvel essai navigateur exécuté par ce constructeur.
+
+Deux messages corrigés après reproduction Node rouge→vert : refus d’une prise occupée affiché aussi sous le menu concerné (pas d’échange de fiches), et message de reprise dérivé de l’étape acquise/partielle à l’initialisation seulement. Les messages d’action ne sont pas remplacés par les redraws.
+
+Investigation du 404 : les URL publiques `/favicon.ico` et `/coffret-futuriste/favicon.ico` renvoyaient effectivement 404 et l’entrée n’avait aucun `rel=icon`. Une icône SVG locale explicitement référencée élimine cette ressource implicite manquante. L’URL du 404 de console n’étant pas fournie, son identité reste non démontrée : ne pas prétendre avoir supprimé tous les 404. Les fichiers runtime publiés sont revérifiés par hash après déploiement.
+
+35 tests Node passent, avec quatre régressions supplémentaires : messages de reprise de chaque étape, initialisation sans écrasement des messages d’action, refus inline sans échange de fiches, lien favicon local existant. Syntaxe des modules et diff-check propres.
