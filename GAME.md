@@ -62,3 +62,10 @@ Deux messages corrigés après reproduction Node rouge→vert : refus d’une pr
 Investigation du 404 : les URL publiques `/favicon.ico` et `/coffret-futuriste/favicon.ico` renvoyaient effectivement 404 et l’entrée n’avait aucun `rel=icon`. Une icône SVG locale explicitement référencée élimine cette ressource implicite manquante. L’URL du 404 de console n’étant pas fournie, son identité reste non démontrée : ne pas prétendre avoir supprimé tous les 404. Les fichiers runtime publiés sont revérifiés par hash après déploiement.
 
 35 tests Node passent, avec quatre régressions supplémentaires : messages de reprise de chaque étape, initialisation sans écrasement des messages d’action, refus inline sans échange de fiches, lien favicon local existant. Syntaxe des modules et diff-check propres.
+
+### Complément QA publique 360 × 800 et correction de recouvrement
+Le coordinateur a obtenu une vue DevTools responsive 360 × 800 (émulation, pas un téléphone physique) : branchement direct Soleil → prise 1 observé; mute et volume persistent après recharge. Une icône de haut-parleur apparaît brièvement dans l’onglet, mais aucune écoute n’a établi que le son est audible. Le favicon.ico a été confirmé comme l’URL en 404; les requêtes du jeu étaient 200/304. L’icône locale explicite corrige donc cette cause identifiée.
+
+Capture de QA fournie : les légendes et boutons de zoom recouvraient les étiquettes/câbles en gros plan. Correction structurelle : légende ET boutons restent visibles mais occupent une barre dédiée dans le flux, en dehors du viewport/canvas 3D. Même séparation sur bureau pour éviter une seconde logique de placement. Aucune énigme ou caméra modifiée. Le retest visuel après cette correction reste à faire par le coordinateur.
+
+36 tests Node passent, dont la régression de séparation des outils et de la zone interactive. Son audible, gestes tactiles réels, fluidité mobile et S20 toujours non validés.

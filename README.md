@@ -45,3 +45,5 @@ Publication expressément autorisée par Pascal le 7 novembre 2026 à 11 h 19 (T
 
 ### Correctifs des messages après QA publique
 Le refus d’une prise occupée apparaît maintenant directement sous le menu de la fiche, sans permutation automatique. Le message au chargement reflète la progression restaurée et n’écrase pas les messages d’action lors des rafraîchissements. Une icône locale explicite évite la recherche implicite du favicon racine manquant (404 confirmé); le 404 non identifié de la console ne peut pas être attribué avec certitude sans son URL. 35 tests Node passent après ces corrections.
+
+Après QA responsive bureau à 360 × 800 : la légende et le zoom sont déplacés dans une barre réservée hors canvas, sans masquer de texte. Un branchement direct a été observé, ainsi que la persistance du mute/volume après recharge; cela ne valide ni un écran tactile physique ni un son audible. Le coordinateur a confirmé que le 404 concernait favicon.ico. Retest visuel du nouveau placement encore nécessaire. Suite actuelle : 36 tests Node.
