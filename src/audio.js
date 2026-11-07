@@ -100,7 +100,7 @@ export function audio({
    await pendingResume;
    if(disposed||paused||token!==epoch||!available()||!audible()){if(!disposed&&!available())pause();return false;}
    gains();startScheduler();return true;
-  }catch{paused=true;stopScheduler();report();return false;}
+  }catch{pause();report();return false;}
  }
  function effect(kind){
   if(!kind||settings.effectsVolume===0)return;

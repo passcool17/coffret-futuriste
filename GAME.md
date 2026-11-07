@@ -90,3 +90,5 @@ Les limites conservatrices abandonnent les requêtes excédentaires plutôt que 
 - [ ] Lire/agir pendant 10 minutes sur bureau puis S20 : pas de fatigue, fluidité/échauffement comparés musique active et muette. Aucun résultat matériel promis.
 
 Aucun navigateur ni service externe utilisé pour la construction audio. Pas de renderer Web Audio offline préinstallé; l’échantillon optionnel est donc omis sans ajouter de bibliothèque. Les métriques de voix/temps obtenues dans les tests ne prouvent pas une qualité audible.
+
+Bilan de construction audio : 60 tests passent (36 de base et 24 ajouts). Une dernière régression vérifie qu’un démarrage musical partiellement échoué amortit aussi les voix déjà démarrées. Syntaxe et diff-check propres. Revue indépendante toujours requise avant push; nouveau mix toujours non écouté.
