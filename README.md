@@ -2,6 +2,16 @@
 
 Jeu original de déduction en français, autonome, local et sans backend. Trois mécanismes connectés : routage de quatre câbles, accord d’anneaux, séquence de libération du noyau. Niveau de raisonnement visé : environ 12–14 ans et plus, pas une classification d’âge.
 
+## Version locale en revue — douze dossiers
+
+La nouvelle rejouabilité est construite **localement seulement**, pas encore publiée : douze configurations exactes, trois familles de déduction. Nouvelle partie change les indices, prises, anneaux et ordre final ensemble; le même dossier revient seulement après épuisement du sac de douze. Ce sont trois familles réutilisées, pas une infinité d’énigmes structurellement inédites. Le dossier courant est affiché dans le carnet.
+
+Une sauvegarde historique v1 reprend comme **Partie d’origine conservée**, avec ses anciennes règles et sa progression; seule la prochaine Nouvelle partie confirmée choisit un nouveau dossier. La recharge ne tire jamais une autre configuration. Clé locale inchangée, contenu migré au schéma v2. Préférences et audio conservés.
+
+Une sauvegarde illisible n’est plus écrasée automatiquement : Réessayer la lecture, Nouvelle partie avec confirmation, ou Jouer sans sauvegarder. En mémoire seule, garder la page ouverte; l’ancienne valeur enregistrée reste intacte. Aucune copie persistante secondaire ni synchronisation cloud. Un backup du raw lu reste seulement en mémoire de la session.
+
+**Preuves locales : 90 tests Node**, incluant unicité24/216/24 des douze dossiers, contraintes essentielles, douze parcours dans la vraie app avec DOM/WebGL simulés et recharges à chaque étape, migration v1 et erreurs de stockage. Ce ne sont pas des essais navigateur, ni une validation de lisibilité, son ou S20. Push retenu pour revue indépendante; la version publique reste 7e637f0.
+
 ## Lancer
 
 Depuis `/workspace/games/coffret-futuriste` :
@@ -27,7 +37,7 @@ Construction locale : règles, scène 3D procédurale, gestes pointeur, audio sy
 
 **QA publique bureau rapportée par le coordinateur :** trois étapes résolues, mauvaises solutions refusées, reprise à 2/3 observée. **Restent non validés :** nouveau mix audio, lecteur d’écran, contexte WebGL perdu/restauré et performances matérielles. Le clic et le toucher de la version précédente ont été confirmés par Pascal sur S20 (retour utilisateur, pas profilage). La lisibilité et les gestes demandent encore une inspection plus approfondie. Aucun profilage physique Samsung S20 réalisé par le constructeur. Les tests statiques ne remplacent pas cette QA. Les budgets fps, appels de dessin et mémoire GPU de la spec sont des objectifs, pas des résultats mesurés; l’objet contient de nombreuses étiquettes et nécessite un profil réel, voire un regroupement supplémentaire avant validation mobile finale.
 
-Ressources runtime : environ 2,05 Mo non compressés; environ 0,411 Mo en somme gzip indicative. Le serveur Python ne sert pas gzip par défaut. Pas d’images, police ou audio téléchargés à l’exécution. Pas de compte ni télémétrie dans le jeu. Le prototype est publié séparément sous passcool17, sans modifier les autres jeux.
+Ressources runtime de cette version locale : 2 084 895 octets non compressés sur 16 fichiers; 424 194 octets en somme gzip indicative. Le serveur Python ne sert pas gzip par défaut. Pas d’images, police ou audio téléchargés à l’exécution. Pas de compte ni télémétrie dans le jeu. Le prototype est publié séparément sous passcool17, sans modifier les autres jeux.
 
 Voir `GAME.md` pour la checklist QA et les solutions destinées au testeur, pas à l’interface du jeu.
 
@@ -56,16 +66,20 @@ Limites : trois voix musicales, huit voix d’effets, tampon bruit mono d’une 
 
 Cette passe a été publiée en 9027626 après revue indépendante. Pascal a indiqué que la musique convenait à 12 h 02 (Toronto), selon le coordinateur. Aucun essai auditif du nouveau mix effectué par le constructeur. Les tests utilisent des contextes/horloges factices; aucun renderer offline n’était installé et aucune dépendance n’a été ajoutée pour produire un échantillon. Écoute réelle bureau/S20 et mesure de consommation restent à faire.
 
-## Correction ciblée des anneaux — locale, publication retenue
+## Historique — correction des anneaux, publiée en 26758d5
 
 La solution logique demeure inchangée. Les anciens pictogrammes étaient des plans rectangulaires au-dessus d’un tore, avec une rotation locale de signe erroné : quatre symboles sur six arrivaient inclinés au repère. Les anneaux ont maintenant une face annulaire solide dont la texture de matériau porte directement les symboles vectoriels, sans plaque flottante. Chaque bande possède son repère fixe; le symbole sélectionné est redressé. La même famille de tracés sert aux fiches et languettes physiques.
 
 66 tests Node passent, y compris 18 correspondances physiques, les 216 combinaisons logiques et les deux sens/passage du zéro. Ces contrôles CPU et Canvas2D simulés ne prouvent pas encore le résultat visuel : revue puis QA réelle bureau et 360 × 800 requises avant publication. Sauvegardes, solutions et musique conservées. Voir GAME.md pour le protocole de validation.
 
-### Livraison des icônes et cache — correctif local en attente de revue
+### Historique — livraison des icônes et cache, publiée en 7e637f0
 
 La QA publique suivant 26758d5 a résolu le centre avec les commandes accessibles et repris à l’étape suivante, mais la capture exécutait encore l’ancien rendu et l’ancien texte. Ce n’est donc pas une validation visuelle des nouveaux anneaux. Les fichiers publics nouveaux ont été vérifiés par HTTP; Pages annonce un cache de dix minutes.
 
 L’entrée app.js et les imports modifiés content.js, scene.js et ring-graphics.js portent désormais la version déterministe `rings-26758d5`. Les deux références à content.js utilisent exactement la même URL. Un rechargement normal qui récupère le nouvel HTML choisit ainsi les nouveaux modules, sans DevTools, service worker ni effacement de sauvegarde. Les URL non modifiées du modèle et de l’audio restent uniques. Le délai éventuel de cache HTML/CDN n’est pas supprimé par ce mécanisme.
 
-67 tests Node passent; la résolution du graphe HTML/imports est vérifiée sans navigateur. Correctif local seulement, push retenu pour revue; inspection réelle du nouveau rendu toujours à faire.
+À cette livraison : 67 tests Node passaient; graphe HTML/imports vérifié sans navigateur. Publication 7e637f0 et hashes publics confirmés ensuite; inspection réelle du nouveau rendu distincte de cette preuve réseau.
+
+## Documentation de rejouabilité
+
+Règles et données exactes : `docs/superpowers/specs/2026-11-07-coffret-replay-design.md` (solutions réservées au testeur). Plan exécuté : `docs/superpowers/plans/2026-11-07-coffret-replay-implementation.md`. `GAME.md` décrit les limites et le protocole de QA réel à effectuer avant toute promesse de rendu ou de performances.

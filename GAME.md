@@ -128,3 +128,37 @@ QA après publication autorisée :
 - [ ] Nouvelle géométrie : bandes plates pleines, sans plaques sombres indépendantes; trois triangles fixes. Vérifier les 18 positions et leur concordance au carnet.
 - [ ] Avant résolution (étape1), cadrer Anneaux d’abord, puis cliquer une bande : un cran. En Ensemble, le premier clic ne fait que cadrer; après résolution les anneaux sont verrouillés, volontairement.
 - [ ] Souris/toucher, clavier, rechargement à progression conservée et son inchangé. Ne pas considérer les tests CPU comme preuve visuelle.
+
+## Rejouabilité — construction locale approuvée, push retenu
+
+Concept approuvé t135s903, cahier exact approuvé t135s908. Douze dossiers A1..C4, trois familles; les données et réponses réservées au testeur figurent dans la spec replay, pas ici dans la checklist non spoiler. Version publique toujours 7e637f0; aucune publication de cette passe. Les paragraphes « publication retenue » précédents sont des états historiques, pas une affirmation que les correctifs 26758d5/7e637f0 n’ont pas été publiés.
+
+Nouveaux modules : puzzles.js banque immuable/prédicats/solutions uniques memoïsées; selector.js sac déterministe; session-storage.js frontière d’écriture protectrice. model.js est configuré; content.js formate les mêmes contraintes pour carnet, hints et plaques. Les deux plaques de scene.js sont redessinées lors du changement de dossier seulement, sans réallouer leurs textures. Ordre physique, UV et tracés des anneaux inchangés; seul l’import modèle de ring-graphics.js est versionné. Audio et contrat audio-events inchangés, aucune indication de justesse partielle ajoutée.
+
+Sauvegarde : même clé locale, schéma v2 et dossier explicite. Restore v1 valide conserve valeurs de progression, indices/aides, chrono/défi et préférences normalisées historiques, config legacy, aucun tirage. Les versions inconnues/dossiers invalides ne deviennent pas une autre énigme en silence. Raw original gardé dans l’objet de session; sur disque il reste intact tant qu’aucun remplacement/écriture valide n’a réussi. Ce n’est PAS une copie de secours persistante secondaire. Erreur de lecture/corruption : jeu inerte, timer/actions sans écriture, commandes de récupération hors zone inerte. Erreur quota : progression mémoire maintenue, aucune nouvelle tentative automatique répétée; lecture explicite de l’ancien état demande confirmation. Choix mémoire seul ne remplace jamais le raw ancien.
+
+Reproductions rouges→vertes : modules banque/sélecteur absents; absence de création configurable et migration v2; save non protégé; contenus/plaques fixes; flux app qui écrivait quatre fois sur raw corrompu; graphe de version incomplet. Deux défauts trouvés en intégration ont leur régression propre : requête asynchrone 3D encore constructible après blocage de reprise, et focus conservé dans un bouton de récupération désormais masqué. Les gardes annulent ce démarrage périmé et déplacent le focus au cadrage pertinent.
+
+### Preuves exécutées localement
+
+90/90 tests Node passent, syntaxe de src/tests/helpers et diff-check propres. Aucun test historique de comportement retiré; harness adaptés aux imports/config et à l’état de session active.
+- Les douze dossiers : une seule réponse dans24/216/24 via prédicats de production ET via validateurs du modèle, quatre contraintes essentielles par étage. Douze réponses différentes par étage, également différentes des réponses legacy.
+- Chaque dossier résolu jusqu’au bout par transition et par la vraie app sous doubles DOM/audio/scène, avec recharge après chaque étage; mauvais candidats tous rejetés par les validateurs. Hints/Appliquer suivent les mêmes solutions.
+- Seed1/0x6d2b79f5/0xffffffff et1000 graines : deux sacs sans répétition, frontière différente, régénération stable; vecteur Fisher–Yates de référence indépendant. Restore ne fait pas avancer le sac.
+- Migration v1 aux quatre étapes et états partiels; validation config/selector/corruption; raw invalide conservé malgré ticks et actions; quota et mémoire seule; annulation de Nouvelle partie sans effet.
+- Douze jeux de textes et aides, deux vraies textures Canvas inspectées avec géométrie Three réelle/renderer factice, mêmes textures réutilisées; les18 correspondances de symboles restent couvertes. Aucune preuve visuelle tirée de Canvas factice.
+- Graphe résolu depuis HTML : replay-bank-v1 sur tous modules modifiés, y compris modèle via atlas; une seule URL par module partagé, audio unique. CSS versionné. Pas de service worker, Date.now de cache ni ressource nouvelle externe. Le cache de l’HTML Pages reste distinct.
+
+### QA réelle à coordonner — sans réponses révélées
+
+Utiliser une session de test distincte de la partie physique du propriétaire; ne pas effacer sa sauvegarde pour tester.
+- [ ] Reprendre une copie de partie v1 à1/3 puis2/3 : même position/temps/hints/volumes et « Partie d’origine conservée ». Ne sélectionner Nouvelle partie qu’après cette vérification.
+- [ ] Confirmer Nouvelle partie : ID visible, indices/plaques accordés; recharger immédiatement puis après chaque mécanisme, ID et progression identiques.
+- [ ] Jouer au moins un dossier de chacune des trois familles. Vérifier les douze jeux d’inscriptions à360×800, sans texte tronqué ni ancien indice gravé restant. Les solutions restent dans la spec testeur si nécessaire, pas dans ce protocole.
+- [ ] En session de test, douze nouvelles parties confirmées : douze IDs différents, puis treizième différente de la douzième; annuler une confirmation ne change rien. Ne pas confondre diversité des noms/références et nouveaux mécanismes physiques.
+- [ ] Souris et toucher direct sur anneaux après cadrage, clavier accessible et focus après progression/récupération; aucun changement des repères/glyphes. Contrôler spécifiquement le soleil/étoile et les18 états si rendu douteux.
+- [ ] Stockage illisible/refusé/quota via environnement de test : avertissement lisible hors zone inerte; Réessayer/New/Memory utilisables au clavier; aucune ancienne partie remplacée sans confirmation.
+- [ ] Musique et réglages inchangés, pause/reprise sans rafale; test de non-régression seulement. Aucun nouveau son produit par cette passe.
+- [ ] Après publication ultérieurement autorisée : run Pages exact, graphe HTTP exhaustif des URL réellement versionnées et hashes. Un rechargement normal doit récupérer le nouvel HTML; une query sur la page seule ne versionne pas ses imports.
+
+Limites : pas de navigateur utilisé par le constructeur; doubles Node non équivalents à un navigateur réel, un lecteur d’écran ou un S20. Aucun chiffre de fluidité, profil thermique, niveau humain12–14+ ou nouvelle écoute revendiqué. Revue indépendante puis QA coordonnée requises, sans push automatique de cette branche locale.
