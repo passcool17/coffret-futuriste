@@ -43,7 +43,8 @@ export function createScene(canvas,dispatch,notify){
   const ring=createRing(THREE,document,radii[i],i===1?accent:metal,i===1?'#8ebeb1':'#70838b');textures.push(ring.material[0].map);group.add(ring);pick(ring,{kind:'ring',index:i});
   const l=label(lid,'',0,-1.46-i*.17,.6,2.5,.15);l.visible=false;ringLabels.push(l);
  }
- for(let i=0;i<3;i++){const pointer=new THREE.Mesh(new THREE.ConeGeometry(.045,.06,3),amber);pointer.rotation.z=Math.PI;pointer.position.set(0,radii[i]+.175,.48+RING_DEPTH+.02);pointer.userData.ringReference=i+1;lid.add(pointer);}
+ const referenceMaterial=new THREE.MeshBasicMaterial({color:0xffe06a,toneMapped:false});
+ for(let i=0;i<3;i++){const pointer=new THREE.Mesh(new THREE.ConeGeometry(.045,.06,3),referenceMaterial);pointer.rotation.z=Math.PI;pointer.position.set(0,radii[i]+.175,.48+RING_DEPTH+.02);pointer.userData.ringReference=i+1;lid.add(pointer);}
  pick(box(lid,0,-1.63,.45,.9,.3,.12,amber),{kind:'align'});label(lid,'VÉRIFIER',0,-1.63,.53,.84,.16,'#11212a');
  function shutter(x,text){const g=new THREE.Group();g.position.set(x,0,.84);lid.add(g);box(g,0,0,0,2.94,2.7,.09,graphite);for(let i=0;i<8;i++)box(g,0,-1.14+i*.32,.06,2.8,.025,.02,metal);label(g,text,0,0,.08,2.4,.32);return g;}
  const centerCover=shutter(0,'ALIMENTATION REQUISE'),rightCover=shutter(3.35,'ACCORD REQUIS');

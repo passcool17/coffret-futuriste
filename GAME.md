@@ -162,3 +162,23 @@ Utiliser une session de test distincte de la partie physique du propriétaire; n
 - [ ] Après publication ultérieurement autorisée : run Pages exact, graphe HTTP exhaustif des URL réellement versionnées et hashes. Un rechargement normal doit récupérer le nouvel HTML; une query sur la page seule ne versionne pas ses imports.
 
 Limites : pas de navigateur utilisé par le constructeur; doubles Node non équivalents à un navigateur réel, un lecteur d’écran ou un S20. Aucun chiffre de fluidité, profil thermique, niveau humain12–14+ ou nouvelle écoute revendiqué. Revue indépendante puis QA coordonnée requises, sans push automatique de cette branche locale.
+
+## Repères plus clairs, taille inchangée — correctif local du7novembre2026 (Toronto)
+
+Pascal a demandé des repères plus visibles, puis corrigé explicitement « pas 2 fois plus gros » (t140u). Construction basée sur la description fiable du coordinateur, sans ouvrir l’image : bandes claires, symboles sombres et repères dorés trop discrets. Source vérifiée : les trois cônes utilisaient le matériau ambre métallique éclairé partagé avec d’autres commandes. La nouvelle réponse se limite à un matériau dédié MeshBasicMaterial jaune clair#ffe06a, non tone-mappé; le matériau des autres commandes reste intact. Pas d’augmentation géométrique ni d’effet lumineux/postprocess.
+
+Dimensions AVANT=APRÈS : ConeGeometry(radius0,045,height0,06,radialSegments3), scale[1,1,1], rotationZπ; positions locales x0, y1,405/1,055/0,705, z0,62. Buffers de positions égaux élément par élément à une géométrie de référence antérieure. Boîte locale effective du triangle conique :0,0779422894×0,0599999987×0,0675000027 dans les deux versions. Ces unités sont celles de la scène, pas des pixels ou millimètres.
+
+Mesure de couleurs source en espace linéaire : luminance relative0,423310→0,756119; contraste contre graphite#25343c des interstices5,789344→9,860131. Cette comparaison de données ne reproduit PAS l’éclairage/tone mapping ancien ni le rendu écran et ne mesure pas le contraste avec une bande blanche. Le nouveau matériau ne dépend plus des lumières; aucun bloom/halo, texture, pulsation, lumière ou objet ajouté. Une matière unique partagée par les trois repères et libérée une seule fois, même après dispose répété.
+
+TDD : contraste/matériau et nouvel URL d’entrée/import rouges avant correction; taille exacte vérifiée sur géométrie Three réelle dès le départ.92/92 tests, syntaxe et diff-check. Les nouveaux tests inspectent vrais buffers, bounding boxes, transformations, couleurs et propriétés de matériaux; renderer factice, pas capture. Graphe : app et scene utilisent ring-markers-v1; modèle/banque/atlas conservent replay-bank-v1, une seule URL par module partagé. Aucun changement de règles, solutions, stockage, audio, anneaux ou symboles.
+
+Mise à jour de livraison précédente :56e5ef8 a bien été publié et vérifié par hashes. Le coordinateur rapporte la migration navigateur legacy2/3 intacte, dossierC3 privé résolu3/3, recharges1/3 et3/3 et lecture à360×800. Aucun de ces résultats ne valide le nouveau matériau en cours de revue.
+
+QA ciblée à effectuer après revue/publication autorisée :
+- [ ] Au même cadrage/zoom, repères de même taille et aux mêmes positions, mais plus faciles à repérer dans les trois interstices. Vérifier sur bandes claires sans supposer une amélioration déjà vue.
+- [ ] Trois repères fixes également lisibles en bureau et360×800, sans halo, scintillement ou nouvelle obstruction des glyphes; aucun autre bouton recoloré.
+- [ ] Un clic d’anneau à1/3 après cadrage reste un cran et concorde avec le carnet; à2/3 les anneaux sont normalement verrouillés. Reprise conserve dossier/progression/préférences.
+- [ ] Vérifier que le nouveau matériau a été chargé (nouveau graphe ring-markers-v1), sans vider la sauvegarde. QA sonore/S20 profilé non revendiquée.
+
+Push retenu. Brouillon polish non approuvé préservé et exclu.

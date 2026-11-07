@@ -2,15 +2,15 @@
 
 Jeu original de déduction en français, autonome, local et sans backend. Trois mécanismes connectés : routage de quatre câbles, accord d’anneaux, séquence de libération du noyau. Niveau de raisonnement visé : environ 12–14 ans et plus, pas une classification d’âge.
 
-## Version locale en revue — douze dossiers
+## Douze dossiers — publiés en 56e5ef8
 
-La nouvelle rejouabilité est construite **localement seulement**, pas encore publiée : douze configurations exactes, trois familles de déduction. Nouvelle partie change les indices, prises, anneaux et ordre final ensemble; le même dossier revient seulement après épuisement du sac de douze. Ce sont trois familles réutilisées, pas une infinité d’énigmes structurellement inédites. Le dossier courant est affiché dans le carnet.
+La rejouabilité est publiée en 56e5ef8 : douze configurations exactes, trois familles de déduction. Nouvelle partie change les indices, prises, anneaux et ordre final ensemble; le même dossier revient seulement après épuisement du sac de douze. Ce sont trois familles réutilisées, pas une infinité d’énigmes structurellement inédites. Le dossier courant est affiché dans le carnet.
 
 Une sauvegarde historique v1 reprend comme **Partie d’origine conservée**, avec ses anciennes règles et sa progression; seule la prochaine Nouvelle partie confirmée choisit un nouveau dossier. La recharge ne tire jamais une autre configuration. Clé locale inchangée, contenu migré au schéma v2. Préférences et audio conservés.
 
 Une sauvegarde illisible n’est plus écrasée automatiquement : Réessayer la lecture, Nouvelle partie avec confirmation, ou Jouer sans sauvegarder. En mémoire seule, garder la page ouverte; l’ancienne valeur enregistrée reste intacte. Aucune copie persistante secondaire ni synchronisation cloud. Un backup du raw lu reste seulement en mémoire de la session.
 
-**Preuves locales : 90 tests Node**, incluant unicité24/216/24 des douze dossiers, contraintes essentielles, douze parcours dans la vraie app avec DOM/WebGL simulés et recharges à chaque étape, migration v1 et erreurs de stockage. Ce ne sont pas des essais navigateur, ni une validation de lisibilité, son ou S20. Push retenu pour revue indépendante; la version publique reste 7e637f0.
+**Preuves locales : 90 tests Node**, incluant unicité24/216/24 des douze dossiers, contraintes essentielles, douze parcours dans la vraie app avec DOM/WebGL simulés et recharges à chaque étape, migration v1 et erreurs de stockage. Ce ne sont pas des essais navigateur, ni une validation de lisibilité, son ou S20. Cette version a depuis été publiée en 56e5ef8; la QA complémentaire rapportée ci-dessous reste distincte des tests Node.
 
 ## Lancer
 
@@ -83,3 +83,11 @@ L’entrée app.js et les imports modifiés content.js, scene.js et ring-graphic
 ## Documentation de rejouabilité
 
 Règles et données exactes : `docs/superpowers/specs/2026-11-07-coffret-replay-design.md` (solutions réservées au testeur). Plan exécuté : `docs/superpowers/plans/2026-11-07-coffret-replay-implementation.md`. `GAME.md` décrit les limites et le protocole de QA réel à effectuer avant toute promesse de rendu ou de performances.
+
+## Repères fixes — correctif local, en attente de revue
+
+Demande précisée : plus clairs, **pas plus grands**. Seul le matériau des trois petits repères fixes change : jaune doré clair constant, indépendant des lumières et du tone mapping. Rayon0,045, hauteur0,06, trois segments, positions/rotation/échelle et buffers géométriques strictement identiques. Aucun halo, animation, lumière ou texture supplémentaire. Règles, sauvegardes, audio et glyphes intégrés inchangés.
+
+92 tests Node passent. Le contraste calculé des couleurs source contre le graphite des interstices passe de5,79 à9,86; ce n’est pas une mesure des pixels rendus, ni un contraste garanti contre les bandes blanches. La lisibilité effective doit être revue dans le navigateur. Nouvelle entrée/import scène versionnés `ring-markers-v1`, dépendances inchangées conservant leurs URL canoniques.
+
+QA de56e5ef8 rapportée par le coordinateur : reprise legacy2/3, dossierC3 résolu3/3 en session privée, recharge1/3 et3/3, lecture360×800. Ces essais ne valident pas encore ce nouveau matériau; aucun navigateur/image utilisé pour construire le correctif. Aucun push de cette passe avant revue indépendante.
