@@ -36,3 +36,13 @@ Les raisonnements humains et les contraintes indépendantes sont détaillés dan
 ## Limites à traiter selon la QA
 
 Pas de navigateur lancé par le constructeur : gestes, cadrage, son et performances restent à observer. Les sources ne constituent pas une preuve visuelle. La scène utilise un plafonnement de ratio pixels et une réduction de qualité; son seuil doit être vérifié au profiler. Le nombre d’objets/étiquettes peut nécessiter une optimisation des appels de dessin. Le noyau n’a pas de pulsation continue, afin de garder le rendu à la demande au repos. Pas de génération aléatoire ni d’autre coffret.
+
+## Corrections de revue — 7 novembre 2026, 11 h 17 et suivantes (Toronto)
+
+Deux défauts reproduits avant correction dans des tests Node, sans lancer de navigateur :
+- Après deux relances, un clic d’anneau déclenchait trois actions. Les listeners de la scène sont désormais enregistrés dans un registre et tous retirés au dispose, sur canvas/window/document. Dispose est idempotent; capture, RAF, observer, géométries, matériaux, textures et renderer sont libérés. Une scène perdue ou détruite ne traite plus d’entrée. Les relances asynchrones concurrentes ne construisent que la dernière scène demandée.
+- Une languette désactivée laissait le focus sur le body; les boutons de vérification sans ID perdaient aussi le focus. Toutes les commandes reconstruites ont un ID stable. Le focus reste sur le contrôle actif s’il demeure disponible; sinon passe à la prochaine languette disponible (avec bouclage), à la poignée après la quatrième, puis à un contrôle/navigation disponible. Le déverrouillage transfère explicitement le focus clavier vers le nouveau module. Les rafraîchissements ne capturent pas le focus extérieur.
+
+31 tests passent, dont les nouvelles reproductions cycle de vie et focus. Le harness de cycle de vie utilise la géométrie Three.js réelle, un renderer factice et des EventTarget Node; celui du focus utilise un DOM minimal simulé. Ils ne prouvent pas le fonctionnement visuel dans Chrome ni un lecteur d’écran réel.
+
+QA navigateur toujours bloquée : le coordinateur signale localhost inaccessible depuis le navigateur malgré HTTP 200 via curl. Aucun contournement par automatisation navigateur tenté. Rendu, son et S20 restent non validés. Ajouter à la QA réelle : relancer la vue deux fois puis cliquer un anneau (un seul cran), et résoudre la séquence au clavier sans perdre le focus.

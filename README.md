@@ -30,3 +30,7 @@ Construction locale : règles, scène 3D procédurale, gestes pointeur, audio sy
 Ressources runtime : environ 2,05 Mo non compressés; environ 0,411 Mo en somme gzip indicative. Le serveur Python ne sert pas gzip par défaut. Pas d’images, police ou audio téléchargés à l’exécution. Pas de compte, télémétrie ou publication. Aucun remote Git configuré.
 
 Voir `GAME.md` pour la checklist QA et les solutions destinées au testeur, pas à l’interface du jeu.
+
+### Revue corrective locale
+
+Nettoyage des handlers après relance 3D et continuité du focus clavier corrigés, avec reproductions Node rouge→vert (31 tests au total). Ces tests utilisent des doubles DOM/WebGL, pas un navigateur. La QA Chrome reste bloquée sur localhost selon le coordinateur; aucune validation visuelle/sonore/S20 supplémentaire n’est revendiquée.

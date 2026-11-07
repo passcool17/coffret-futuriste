@@ -54,9 +54,11 @@ export function createScene(canvas,dispatch,notify){
  label(lid,'☼ < ≋   /   ☼ ~ ≋',-3.35,1.25,.4,2.5,.16);label(lid,'☼ < △   /   ≋ ~ ♧',-3.35,-1.95,.4,2.5,.16);
  const moduleTargets=[];for(let i=0;i<3;i++){const proxy=pick(box(lid,[-3.35,0,3.35][i],0,1.3,3.16,3.75,.01,new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false})),{kind:'module',index:i});moduleTargets.push(proxy);}
  let state,selected=null,drag=null,view=-1,zoom=1,yaw=0,tilt=.6,raf=0,disposed=false,lost=false;
+ const listeners=[];
+ function listen(target,type,handler,allowLost=false){const guarded=e=>{if(disposed||lost&&!allowLost)return;handler(e);};target.addEventListener(type,guarded);listeners.push(()=>target.removeEventListener(type,guarded));}
  let lidAngle=0,cover1=0,cover2=0,coreZ=-.05;let previousStage=0;
  const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();const plane=new THREE.Plane(new THREE.Vector3(0,0,1),-.65);
- function size(){const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();request();}
+ function size(){if(disposed||lost)return;const r=canvas.getBoundingClientRect();renderer.setSize(r.width,r.height,false);camera.aspect=r.width/Math.max(1,r.height);camera.updateProjectionMatrix();request();}
  const obs=new ResizeObserver(size);obs.observe(canvas);
  function point(e){const r=canvas.getBoundingClientRect();ndc.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);ray.setFromCamera(ndc,camera);return ray.intersectObjects(targets,false).find(hit=>{const a=hit.object.userData.action;if(!a)return false;if(view<0)return a.kind==='module';if(a.kind==='module')return false;return a.kind==='ring'||a.kind==='align'?state.stage>=1:a.kind==='tab'||a.kind==='open'?state.stage>=2:true;});}
  function onPlane(e){point(e);return ray.ray.intersectPlane(plane,new THREE.Vector3());}
@@ -67,7 +69,7 @@ export function createScene(canvas,dispatch,notify){
  function focus(v){view=v;yaw=0;tilt=.6;zoom=1;request();}
  function request(){if(!raf&&!disposed&&!lost&&!document.hidden)raf=requestAnimationFrame(render);}
  let slowSamples=[],quality=0;
- function render(){raf=0;if(!state||lost)return;const reduced=state.settings.reduced;const factor=reduced?1:.16;const targetLid=state.stage===3?-65*Math.PI/180:0,t1=state.stage>0?1:0,t2=state.stage>1?1:0,tz=state.stage===3?.7:-.05;
+ function render(){raf=0;if(disposed||!state||lost)return;const reduced=state.settings.reduced;const factor=reduced?1:.16;const targetLid=state.stage===3?-65*Math.PI/180:0,t1=state.stage>0?1:0,t2=state.stage>1?1:0,tz=state.stage===3?.7:-.05;
  lidAngle+=(targetLid-lidAngle)*factor;cover1+=(t1-cover1)*factor;cover2+=(t2-cover2)*factor;coreZ+=(tz-coreZ)*factor;
  lidPivot.rotation.x=lidAngle;centerCover.position.y=cover1*1.3;centerCover.scale.y=1-cover1*.97;rightCover.position.y=cover2*1.3;rightCover.scale.y=1-cover2*.97;core.position.z=coreZ;handle.rotation.x=state.stage===3?-.4:0;
  const x=view<0?0:[-3.35,0,3.35][view];const distance=(view<0?Math.max(8.8,16/camera.aspect):Math.max(5.6,5.4/camera.aspect))*zoom;camera.position.set(x+Math.sin(yaw)*distance*.4,-Math.sin(tilt)*distance,Math.cos(tilt)*distance);camera.lookAt(x,0,0);camera.updateMatrixWorld();
@@ -75,9 +77,9 @@ export function createScene(canvas,dispatch,notify){
  const anim=Math.abs(targetLid-lidAngle)+Math.abs(t1-cover1)+Math.abs(t2-cover2)+Math.abs(tz-coreZ)>.003;if(anim)request();
  }
  const ringAngle=e=>{const center=new THREE.Vector3(0,0,.5).project(camera),r=canvas.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+(1-center.y)*r.height/2),e.clientX-(r.left+(center.x+1)*r.width/2));};
- canvas.addEventListener('pointerdown',e=>{if(!state||drag)return;if(e.button!==0)return;const hit=point(e);drag={id:e.pointerId,x:e.clientX,y:e.clientY,action:hit?.object.userData.action,startYaw:yaw,startTilt:tilt,angle:ringAngle(e),base:hit?.object.userData.action.kind==='ring'?state.rings[hit.object.userData.action.index]:0,moved:false};canvas.setPointerCapture(e.pointerId);});
- canvas.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>8)drag.moved=true;if(!drag.moved)return;const a=drag.action;if(!a){yaw=THREE.MathUtils.clamp(drag.startYaw+dx*.004,-.61,.61);tilt=THREE.MathUtils.clamp(drag.startTilt+dy*.003,.26,.96);}else if(a.kind==='plug'&&state.stage===0){const p=onPlane(e);if(p){plugs[a.index].position.x=THREE.MathUtils.clamp(p.x,-4.9,-1.8);plugs[a.index].position.y=THREE.MathUtils.clamp(p.y,-1.4,1.1);wireUpdate(a.index);}}else if(a.kind==='ring'&&state.stage===1){let delta=ringAngle(e)-drag.angle;delta=Math.atan2(Math.sin(delta),Math.cos(delta));drag.value=(drag.base+Math.round(-delta/(Math.PI/3))+6)%6;rings[a.index].rotation.z=drag.value*Math.PI/3;}else if(a.kind==='tab'&&state.stage===2){tabs[a.index].position.y=THREE.MathUtils.clamp(.65-dy*.01,-.1,.65);}request();});
- canvas.addEventListener('pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const d=drag,a=d.action;drag=null;try{canvas.releasePointerCapture(e.pointerId);}catch{}if(!a){request();return;}
+ listen(canvas,'pointerdown',e=>{if(!state||drag)return;if(e.button!==0)return;const hit=point(e);drag={id:e.pointerId,x:e.clientX,y:e.clientY,action:hit?.object.userData.action,startYaw:yaw,startTilt:tilt,angle:ringAngle(e),base:hit?.object.userData.action.kind==='ring'?state.rings[hit.object.userData.action.index]:0,moved:false};canvas.setPointerCapture(e.pointerId);});
+ listen(canvas,'pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y;if(Math.hypot(dx,dy)>8)drag.moved=true;if(!drag.moved)return;const a=drag.action;if(!a){yaw=THREE.MathUtils.clamp(drag.startYaw+dx*.004,-.61,.61);tilt=THREE.MathUtils.clamp(drag.startTilt+dy*.003,.26,.96);}else if(a.kind==='plug'&&state.stage===0){const p=onPlane(e);if(p){plugs[a.index].position.x=THREE.MathUtils.clamp(p.x,-4.9,-1.8);plugs[a.index].position.y=THREE.MathUtils.clamp(p.y,-1.4,1.1);wireUpdate(a.index);}}else if(a.kind==='ring'&&state.stage===1){let delta=ringAngle(e)-drag.angle;delta=Math.atan2(Math.sin(delta),Math.cos(delta));drag.value=(drag.base+Math.round(-delta/(Math.PI/3))+6)%6;rings[a.index].rotation.z=drag.value*Math.PI/3;}else if(a.kind==='tab'&&state.stage===2){tabs[a.index].position.y=THREE.MathUtils.clamp(.65-dy*.01,-.1,.65);}request();});
+ listen(canvas,'pointerup',e=>{if(!drag||e.pointerId!==drag.id)return;const d=drag,a=d.action;drag=null;try{canvas.releasePointerCapture(e.pointerId);}catch{}if(!a){request();return;}
  if(a.kind==='module'){if(!d.moved)dispatch({type:'focus',index:a.index});}
  else if(a.kind==='plug'&&state.stage===0){if(d.moved){const p=onPlane(e);const slot=p&&sourceX.findIndex(x=>Math.abs(p.x-x)<.33&&Math.abs(p.y-socketY)<.38);if(Number.isInteger(slot)&&slot>=0)dispatch({type:'connect',symbol:a.symbol,slot});else restorePositions();}else {if(selected===a.index){dispatch({type:'unplug',symbol:a.symbol});selected=null;}else{selected=a.index;notify(names[a.symbol]+' sélectionné : touchez une prise, ou sa fiche pour débrancher.');}restorePositions();}}
  else if(a.kind==='socket'&&selected!==null&&state.stage===0){dispatch({type:'connect',symbol:SYMBOLS[selected],slot:a.slot});selected=null;restorePositions();}
@@ -86,9 +88,9 @@ export function createScene(canvas,dispatch,notify){
  else if(a.kind==='power')dispatch({type:'power'});else if(a.kind==='align')dispatch({type:'align'});else if(a.kind==='open')dispatch({type:'open'});else if(!d.moved)notify('Ce module attend l’étape précédente.');
  restorePositions();request();});
  function cancel(){if(drag){try{canvas.releasePointerCapture(drag.id);}catch{}drag=null;restorePositions();request();}}
- canvas.addEventListener('pointercancel',cancel);canvas.addEventListener('lostpointercapture',cancel);window.addEventListener('blur',cancel);window.addEventListener('orientationchange',cancel);
- canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();lost=true;notify('Contexte 3D perdu. Utilisez les commandes accessibles ou relancez la vue.',true);});canvas.addEventListener('webglcontextrestored',()=>{lost=false;request();});
- document.addEventListener('visibilitychange',()=>{cancel();if(!document.hidden)request();});
- window.addEventListener('keydown',e=>{if(e.key==='Escape')cancel();});
- size();return {update,focus,cancel,zoom(delta){zoom=THREE.MathUtils.clamp(zoom+delta,.65,1.5);request();},dispose(){disposed=true;cancelAnimationFrame(raf);obs.disconnect();renderer.dispose();textures.forEach(t=>t.dispose());},stats:()=>renderer.info};
+ listen(canvas,'pointercancel',cancel);listen(canvas,'lostpointercapture',cancel);listen(window,'blur',cancel);listen(window,'orientationchange',cancel);
+ listen(canvas,'webglcontextlost',e=>{e.preventDefault();cancel();lost=true;notify('Contexte 3D perdu. Utilisez les commandes accessibles ou relancez la vue.',true);});listen(canvas,'webglcontextrestored',()=>{lost=false;request();},true);
+ listen(document,'visibilitychange',()=>{cancel();if(!document.hidden)request();});
+ listen(window,'keydown',e=>{if(e.key==='Escape')cancel();});
+ size();return {update,focus,cancel,zoom(delta){zoom=THREE.MathUtils.clamp(zoom+delta,.65,1.5);request();},dispose(){if(disposed)return;listeners.splice(0).forEach(remove=>remove());cancel();disposed=true;cancelAnimationFrame(raf);raf=0;obs.disconnect();const geometries=new Set(),materials=new Set();world.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m);});geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());renderer.dispose();},stats:()=>renderer.info};
 }
