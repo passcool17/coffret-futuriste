@@ -69,3 +69,24 @@ Le coordinateur a obtenu une vue DevTools responsive 360 × 800 (émulation, pas
 Capture de QA fournie : les légendes et boutons de zoom recouvraient les étiquettes/câbles en gros plan. Correction structurelle : légende ET boutons restent visibles mais occupent une barre dédiée dans le flux, en dehors du viewport/canvas 3D. Même séparation sur bureau pour éviter une seconde logique de placement. Aucune énigme ou caméra modifiée. Le retest visuel après cette correction reste à faire par le coordinateur.
 
 36 tests Node passent, dont la régression de séparation des outils et de la zone interactive. Son audible, gestes tactiles réels, fluidité mobile et S20 toujours non validés.
+
+## Passe audio — état courant avant revue indépendante
+
+Design et construction autorisés par Pascal via sa réponse à la carte t126s858. Implémentation locale uniquement, push retenu pour revue. Version publique inchangée : 8bf3225. Aucun autre jeu ou compte modifié. Les notes de QA plus anciennes ci-dessus décrivent les versions et observations à leur date. Mise à jour : correctif de recouvrement retesté avec succès à 360 × 800 et favicon 200, selon le coordinateur; Pascal a confirmé le clic entendu et le toucher direct sur S20 à 11 h 36 (Toronto). Cela ne valide pas cette nouvelle musique ni un profilage S20.
+
+Changements locaux : `audio-events.js` isole un contrat sans symboles/solutions; `audio.js` conserve un seul contexte paresseux, bus Musique/Effets/master, limiteur, voix et scheduler bornés. Nappe originale huit mesures à 72 bpm sans percussion, timbres mécaniques distincts, ouverture/cadence uniquement après progression acquise. Réglages général/Musique/Effets persistants. Sauvegarde v1 conservée et migrée sans perdre fiches, anneaux, séquence, chrono ou mute.
+
+Pause : timer musique arrêté, voix futures annulées, sortie amortie sur 15 ms et suspension à 25 ms. Reprise depuis geste seulement, pas de son joué en rafale après retour. Fermeture définitive dispose le contexte; pagehide avec bfcache le suspend sans rendre le retour inutilisable. Allocations échouées et promesses resume rejetées sont capturées avec message français une fois; une autre commande peut réessayer.
+
+Les limites conservatrices abandonnent les requêtes excédentaires plutôt que dépasser trois voix musicales ou huit effets, ni produire une queue différée. Le final est prioritaire sur le filtre anti-rebond. Tout cela est testé avec doubles, pas mesuré sur hardware.
+
+### Checklist d’écoute de cette nouvelle passe
+- [ ] Premier geste déclenche musique douce; aucun autoplay au chargement. Test avec une ancienne sauvegarde à 2/3, mute activé et désactivé.
+- [ ] Écouter au casque puis haut-parleur/mono : musique en retrait, effets identifiables, aucune agressivité ni saturation audible. Volume faible d’abord.
+- [ ] Vérifier réglages indépendants général/Musique/Effets et mute après recharge; deux bus à zéro ne consomment pas un scheduler actif.
+- [ ] Comparer sons de crans/fiches corrects ou incorrects avant validation : aucune différence indiquant la solution.
+- [ ] Menu/pause/onglet caché/app en arrière-plan : extinction sans bruit parasite, reprise sans rafale au prochain geste; vérifier Safari/Chrome si disponibles.
+- [ ] Entrées très rapides, dernière languette puis poignée : cadence finale toujours présente; recharger fini ne la rejoue pas.
+- [ ] Lire/agir pendant 10 minutes sur bureau puis S20 : pas de fatigue, fluidité/échauffement comparés musique active et muette. Aucun résultat matériel promis.
+
+Aucun navigateur ni service externe utilisé pour la construction audio. Pas de renderer Web Audio offline préinstallé; l’échantillon optionnel est donc omis sans ajouter de bibliothèque. Les métriques de voix/temps obtenues dans les tests ne prouvent pas une qualité audible.
