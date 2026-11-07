@@ -27,10 +27,18 @@ Construction locale : règles, scène 3D procédurale, gestes pointeur, audio sy
 
 **Pas encore validés par un navigateur à la livraison :** rendu, lisibilité des gravures, précision des gestes, annonces lecteur d’écran, audio audible, contexte WebGL réel et parcours navigateur complet. Aucun test physique Samsung S20 réalisé. Les tests statiques ne remplacent pas cette QA. Les budgets fps, appels de dessin et mémoire GPU de la spec sont des objectifs, pas des résultats mesurés; l’objet contient de nombreuses étiquettes et nécessite un profil réel, voire un regroupement supplémentaire avant validation mobile finale.
 
-Ressources runtime : environ 2,05 Mo non compressés; environ 0,411 Mo en somme gzip indicative. Le serveur Python ne sert pas gzip par défaut. Pas d’images, police ou audio téléchargés à l’exécution. Pas de compte, télémétrie ou publication. Aucun remote Git configuré.
+Ressources runtime : environ 2,05 Mo non compressés; environ 0,411 Mo en somme gzip indicative. Le serveur Python ne sert pas gzip par défaut. Pas d’images, police ou audio téléchargés à l’exécution. Pas de compte ni télémétrie dans le jeu. Le prototype est publié séparément sous passcool17, sans modifier les autres jeux.
 
 Voir `GAME.md` pour la checklist QA et les solutions destinées au testeur, pas à l’interface du jeu.
 
 ### Revue corrective locale
 
 Nettoyage des handlers après relance 3D et continuité du focus clavier corrigés, avec reproductions Node rouge→vert (31 tests au total). Ces tests utilisent des doubles DOM/WebGL, pas un navigateur. La QA Chrome reste bloquée sur localhost selon le coordinateur; aucune validation visuelle/sonore/S20 supplémentaire n’est revendiquée.
+
+## Prototype public — publication autorisée
+
+- Jeu : https://passcool17.github.io/coffret-futuriste/
+- Sources : https://github.com/passcool17/coffret-futuriste
+- GitHub Pages : branche `main`, dossier racine `/`, fichiers statiques avec `.nojekyll`.
+
+Publication expressément autorisée par Pascal le 7 novembre 2026 à 11 h 19 (Toronto), malgré la QA visuelle et sonore locale bloquée. La vérification de disponibilité HTTP et d’identité des fichiers est distincte d’un essai du jeu : rendu, son, gestes et performances S20 restent non validés. Les solutions sont séparées dans GAME.md et les documents de conception, pas affichées dans le jeu hors indices demandés.

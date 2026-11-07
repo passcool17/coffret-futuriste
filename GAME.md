@@ -2,7 +2,7 @@
 
 ## Livraison
 
-Prototype vertical jouable à trois énigmes, construit localement après approbation du design. Ce n’est pas une certification de qualité visuelle ou de performance S20. Aucun autre jeu modifié, aucun dépôt distant créé, aucun push/déploiement.
+Prototype vertical jouable à trois énigmes, construit localement après approbation du design. Ce n’est pas une certification de qualité visuelle ou de performance S20. Aucun autre jeu modifié. Publication du prototype autorisée ensuite, le 7 novembre 2026 à 11 h 19 (Toronto), sur le nouveau dépôt public passcool17/coffret-futuriste et GitHub Pages.
 
 Fichiers : `src/model.js` règles et sauvegarde; `src/app.js` interface/session; `src/content.js` indices; `src/scene.js` scène et gestes; `src/audio.js` clics synthétiques; `style.css` présentation; `vendor/` Three.js et licence. Aucun build requis.
 
@@ -46,3 +46,9 @@ Deux défauts reproduits avant correction dans des tests Node, sans lancer de na
 31 tests passent, dont les nouvelles reproductions cycle de vie et focus. Le harness de cycle de vie utilise la géométrie Three.js réelle, un renderer factice et des EventTarget Node; celui du focus utilise un DOM minimal simulé. Ils ne prouvent pas le fonctionnement visuel dans Chrome ni un lecteur d’écran réel.
 
 QA navigateur toujours bloquée : le coordinateur signale localhost inaccessible depuis le navigateur malgré HTTP 200 via curl. Aucun contournement par automatisation navigateur tenté. Rendu, son et S20 restent non validés. Ajouter à la QA réelle : relancer la vue deux fois puis cliquer un anneau (un seul cran), et résoudre la séquence au clavier sans perdre le focus.
+
+## Publication du prototype
+
+Jeu : https://passcool17.github.io/coffret-futuriste/
+Sources : https://github.com/passcool17/coffret-futuriste
+Déploiement statique GitHub Pages depuis `main:/`, sans dépendance CDN runtime. `.nojekyll` conserve les fichiers tels quels. La vérification de livraison compare les SHA-256 locaux et les réponses publiques pour l’entrée, le CSS et tous les modules, y compris les deux fichiers Three.js. Cette vérification réseau ne valide ni le rendu ni l’audio. Aucun navigateur ou S20 testé; checklist ci-dessus toujours ouverte.
