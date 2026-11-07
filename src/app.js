@@ -1,5 +1,5 @@
 import {fresh,transition,restore,tick,SYMBOLS} from './model.js';
-import {names,glyphs,titles,intros,clues,definitions,hints,resumeMessage} from './content.js';
+import {names,glyphs,titles,intros,clues,definitions,hints,resumeMessage} from './content.js?v=rings-26758d5';
 import {audio} from './audio.js';
 import {audioEvent} from './audio-events.js';
 import {replaceControls} from './control-focus.js';
@@ -39,5 +39,5 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!document.querySelect
 window.addEventListener('focus',()=>{hasFocus=true;last=performance.now();});window.addEventListener('blur',()=>{hasFocus=false;sound.pause();scene?.cancel();save();});document.addEventListener('visibilitychange',()=>{last=performance.now();if(document.hidden){sound.pause();scene?.cancel();save();}});
 window.addEventListener('pagehide',e=>{if(e.persisted)sound.pause();else sound.dispose();});
 setInterval(()=>{const now=performance.now(),dt=(now-last)/1000;last=now;const active=!document.hidden&&hasFocus&&!document.querySelector('dialog[open]');state=tick(state,dt,active);$('clock').textContent=(state.challenge?'Défi ':'')+format(state.challenge?1500-state.elapsed:state.elapsed);if(active)save();if(state.challenge&&state.elapsed>=1500&&!timeoutShown&&active){timeoutShown=true;$('timeout').showModal();sound.pause();}},1000);
-async function startScene(){const generation=++sceneGeneration;try{scene?.dispose();scene=null;const {createScene}=await import('./scene.js');if(generation!==sceneGeneration)return;scene=createScene($('scene'),act,announce);scene.update(state,true);scene.focus(-1);$('fallback').hidden=true;}catch(error){if(generation!==sceneGeneration)return;console.warn('Vue 3D indisponible',error);announce('Vue 3D indisponible. Les commandes accessibles permettent de jouer.',true);}}
+async function startScene(){const generation=++sceneGeneration;try{scene?.dispose();scene=null;const {createScene}=await import('./scene.js?v=rings-26758d5');if(generation!==sceneGeneration)return;scene=createScene($('scene'),act,announce);scene.update(state,true);scene.focus(-1);$('fallback').hidden=true;}catch(error){if(generation!==sceneGeneration)return;console.warn('Vue 3D indisponible',error);announce('Vue 3D indisponible. Les commandes accessibles permettent de jouer.',true);}}
 $('retry').onclick=startScene;view=Math.min(state.stage,2);won=state.stage===3;render();announce(resumeMessage(state));startScene();

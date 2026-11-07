@@ -112,3 +112,19 @@ Demande t131u et précision t132u : énigme centrale difficile à interpréter, 
 - [ ] Vérifier musique/volumes/mute inchangés, uniquement comme non-régression. Aucun nouvel essai auditif du constructeur.
 
 Push volontairement retenu pour revue indépendante et coordination de la QA réelle. Le brouillon de conception générale non approuvé reste hors de ce correctif.
+
+## Livraison cache — investigation et correction locale, 7 novembre 2026 (Toronto)
+
+La dernière QA publique annoncée sur 26758d5 a résolu le centre par contrôles accessibles et rechargé la troisième étape. Toutefois la capture montre les anciens tores/plaques et l’ancienne phrase « sous le repère du haut » : cette session exécutait des modules antérieurs. Cette résolution n’est PAS une validation des nouvelles faces intégrées. Les requêtes HTTP ordinaires et avec paramètre neuf ont livré les nouveaux fichiers, avec `Cache-Control: max-age=600`; aucune réponse CDN ancienne reproduite depuis Shell. Cache HTTP navigateur ou modules conservés par le document : distinction non établie sans son réseau. Aucun service worker.
+
+Manifeste d’investigation externe au jeu : `/workspace/coffret-cache-audit-26758d5.json`. Treize ressources runtime parcourues récursivement, toutes 200 et identiques. Le manifeste audio précédent comptait douze ressources runtime plus LICENSE et .nojekyll (14); avec ring-graphics, le total comparable est maintenant 15. Il ne manquait pas de module.
+
+Correctif minimal local : HTML→app.js?v=rings-26758d5; app→content/scene versionnés; scene→content/ring-graphics avec la même version. Modèle, audio, Three.js et autres dépendances inchangés gardent leurs URL canoniques, sans duplication des singletons. Même origine, même clé de sauvegarde, aucun changement de règles ni d’audio. Pas de Date.now ou d’invalidation du stockage. Il faut que le navigateur obtienne le nouvel HTML; le délai de cache HTML Pages éventuel reste distinct.
+
+Régression rouge sur l’entrée non versionnée, puis verte : le graphe simulé à partir du vrai HTML et des vrais imports statiques/dynamiques atteint chacun des quatre modules modifiés uniquement par URL versionnée, et conserve une seule URL pour modèle/audio/événements/focus. 67 tests, syntaxe et diff-check. Push retenu pour revue.
+
+QA après publication autorisée :
+- [ ] Rechargement normal sans vider le stockage : progression conservée; nouvelle phrase « repères fixes du haut, un par anneau » visible.
+- [ ] Nouvelle géométrie : bandes plates pleines, sans plaques sombres indépendantes; trois triangles fixes. Vérifier les 18 positions et leur concordance au carnet.
+- [ ] Avant résolution (étape1), cadrer Anneaux d’abord, puis cliquer une bande : un cran. En Ensemble, le premier clic ne fait que cadrer; après résolution les anneaux sont verrouillés, volontairement.
+- [ ] Souris/toucher, clavier, rechargement à progression conservée et son inchangé. Ne pas considérer les tests CPU comme preuve visuelle.

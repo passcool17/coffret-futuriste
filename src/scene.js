@@ -1,7 +1,7 @@
 import * as THREE from '../vendor/three.module.js';
 import {SYMBOLS} from './model.js';
-import {names,glyphs} from './content.js';
-import {createRing,drawSymbol,RING_DEPTH,ringValueFromDrag} from './ring-graphics.js';
+import {names,glyphs} from './content.js?v=rings-26758d5';
+import {createRing,drawSymbol,RING_DEPTH,ringValueFromDrag} from './ring-graphics.js?v=rings-26758d5';
 
 export function createScene(canvas,dispatch,notify){
  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});

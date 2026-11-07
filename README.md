@@ -61,3 +61,11 @@ Cette passe a été publiée en 9027626 après revue indépendante. Pascal a ind
 La solution logique demeure inchangée. Les anciens pictogrammes étaient des plans rectangulaires au-dessus d’un tore, avec une rotation locale de signe erroné : quatre symboles sur six arrivaient inclinés au repère. Les anneaux ont maintenant une face annulaire solide dont la texture de matériau porte directement les symboles vectoriels, sans plaque flottante. Chaque bande possède son repère fixe; le symbole sélectionné est redressé. La même famille de tracés sert aux fiches et languettes physiques.
 
 66 tests Node passent, y compris 18 correspondances physiques, les 216 combinaisons logiques et les deux sens/passage du zéro. Ces contrôles CPU et Canvas2D simulés ne prouvent pas encore le résultat visuel : revue puis QA réelle bureau et 360 × 800 requises avant publication. Sauvegardes, solutions et musique conservées. Voir GAME.md pour le protocole de validation.
+
+### Livraison des icônes et cache — correctif local en attente de revue
+
+La QA publique suivant 26758d5 a résolu le centre avec les commandes accessibles et repris à l’étape suivante, mais la capture exécutait encore l’ancien rendu et l’ancien texte. Ce n’est donc pas une validation visuelle des nouveaux anneaux. Les fichiers publics nouveaux ont été vérifiés par HTTP; Pages annonce un cache de dix minutes.
+
+L’entrée app.js et les imports modifiés content.js, scene.js et ring-graphics.js portent désormais la version déterministe `rings-26758d5`. Les deux références à content.js utilisent exactement la même URL. Un rechargement normal qui récupère le nouvel HTML choisit ainsi les nouveaux modules, sans DevTools, service worker ni effacement de sauvegarde. Les URL non modifiées du modèle et de l’audio restent uniques. Le délai éventuel de cache HTML/CDN n’est pas supprimé par ce mécanisme.
+
+67 tests Node passent; la résolution du graphe HTML/imports est vérifiée sans navigateur. Correctif local seulement, push retenu pour revue; inspection réelle du nouveau rendu toujours à faire.
